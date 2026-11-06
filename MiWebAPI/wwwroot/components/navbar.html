@@ -1,0 +1,51 @@
+﻿<!-- components/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-turistar px-4 py-2 sticky-top shadow-sm">
+    <div class="container-fluid">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <i class="bi bi-geo-alt fs-4 text-warning"></i>
+            <div class="lh-1 mt-1">
+                <div class="fw-bold fs-5 text-dark">TuriStar</div>
+                <div class="text-secondary" style="font-size: 0.6rem; letter-spacing: 1px;">HIDALGO, MX</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menú central -->
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav gap-4 fw-medium" style="font-size: 0.95rem;">
+                <li class="nav-item"><a class="nav-link text-dark" href="explorar.html">Explorar</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="mapa.html">Mapa</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="resenas.html">Reseñas</a></li>
+                <li class="nav-item"><a class="nav-link text-dark" href="perfil.html">Perfil</a></li>
+                <li class="nav-item ms-lg-3 my-2 my-lg-0">
+                    <a href="nuevo_destino.html" class="btn text-white rounded-pill fw-medium px-4 shadow-sm" style="background-color: #528233; border-color: #528233;">
+                        <i class="bi bi-plus-circle me-1"></i> Nuevo Destino
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Buscador -->
+        <div class="d-none d-lg-block me-3">
+            <div class="input-group" style="width: 250px;">
+                <span class="input-group-text input-yellow border-0 rounded-start-pill text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" class="form-control input-yellow border-0 rounded-end-pill" placeholder="Buscar destinos..." style="font-size: 0.9rem;">
+            </div>
+        </div>
+
+        <!-- Usuario / Salir -->
+        <div class="d-flex align-items-center gap-3">
+            <a href="login.html" id="loginLink" class="btn btn-sm btn-outline-success rounded-pill px-3">Ingresar</a>
+            <span id="nombreUsuario" class="fw-medium small text-dark d-none"></span>
+            <button id="btnCerrarSesion" class="btn btn-outline-danger btn-sm rounded-pill px-3 d-none" onclick="cerrarSesion()">
+                <i class="bi bi-box-arrow-right"></i> Salir
+            </button>
+        </div>
+    </div>
+</nav>

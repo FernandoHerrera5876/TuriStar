@@ -1,0 +1,62 @@
+/* css/styles.css */
+body {
+    background-color: #fdfaf6;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #111D33;
+}
+
+.navbar-turistar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.text-turistar-green {
+    color: #528233 !important;
+}
+
+.bg-turistar-green {
+    background-color: #528233 !important;
+    border-color: #528233 !important;
+}
+
+    .bg-turistar-green:hover {
+        background-color: #406827 !important;
+    }
+
+.input-yellow {
+    background-color: #fcf8ee !important;
+    border: 1px solid #f2e9d8 !important;
+}
+
+    .input-yellow:focus {
+        box-shadow: 0 0 0 0.25rem rgba(82, 130, 51, 0.25);
+        border-color: #528233 !important;
+    }
+
+.rating-badge {
+    background-color: #fcf8ee;
+    color: #d97706;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 3px 6px;
+    border-radius: 6px;
+}
+
+.destination-card {
+    border: none;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #ffffff;
+}
+
+    .destination-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+    }
+
+.nav-link.active {
+    color: #528233 !important;
+    font-weight: bold;
+    border-bottom: 2px solid #528233;
+}
