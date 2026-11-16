@@ -10,11 +10,27 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    // --- ¡AQUÍ ESTÁ LA VALIDACIÓN QUE FALTABA! ---
+    const usuarioSesion = JSON.parse(localStorage.getItem('usuarioTuriStar'));
+    if (usuarioSesion) {
+        // C# puede mandarlo como esAdmin o EsAdmin
+        const esAdministrador = usuarioSesion.esAdmin || usuarioSesion.EsAdmin;
+
+        if (esAdministrador) {
+            const btnEditar = document.getElementById('btnEditarDestino');
+            const btnBorrar = document.getElementById('btnBorrarDestino');
+            if (btnBorrar) btnBorrar.classList.remove('d-none');
+            if (btnEditar) {
+                btnEditar.classList.remove('d-none'); // Lo hace visible
+                btnEditar.href = `nuevo_destino.html?editId=${idDestinoActual}`; // Le pasa el ID
+            }
+        }
+    }
+    // ---------------------------------------------
+
     cargarInfoDestino();
     cargarResenas();
     configurarFormularioResena();
-
-    // ¡Asegúrate de que esta línea exista aquí adentro!
     verificarEstadoFavorito();
 });
 
@@ -33,10 +49,23 @@ async function cargarInfoDestino() {
                 document.getElementById('detalleNombre').textContent = destino.nombre;
                 document.getElementById('detalleMunicipio').textContent = destino.municipio;
                 document.getElementById('detalleDescripcion').textContent = destino.descripcion;
-                document.getElementById('detalleHorarios').textContent = destino.horarios;
+                const ulHorarios = document.getElementById('listaHorariosSemana');
+                if (ulHorarios) {
+                    ulHorarios.innerHTML = `
+                        <li class="mb-1"><strong class="text-dark">Lunes:</strong> ${destino.horarioLunes || 'Sin dato'}</li>
+                        <li class="mb-1"><strong class="text-dark">Martes:</strong> ${destino.horarioMartes || 'Sin dato'}</li>
+                        <li class="mb-1"><strong class="text-dark">Miércoles:</strong> ${destino.horarioMiercoles || 'Sin dato'}</li>
+                        <li class="mb-1"><strong class="text-dark">Jueves:</strong> ${destino.horarioJueves || 'Sin dato'}</li>
+                        <li class="mb-1"><strong class="text-dark">Viernes:</strong> ${destino.horarioViernes || 'Sin dato'}</li>
+                        <li class="mb-1"><strong class="text-dark">Sábado:</strong> ${destino.horarioSabado || 'Sin dato'}</li>
+                        <li class="mb-1"><strong class="text-dark">Domingo:</strong> ${destino.horarioDomingo || 'Sin dato'}</li>
+                    `;
+                }
                 document.getElementById('detallePrecioEntrada').textContent = destino.precioEntrada || "0";
                 document.getElementById('detallePrecioEst').textContent = destino.precioEstacionamiento || "0";
-                document.getElementById('detalleComoLlegar').textContent = destino.comoLlegar;
+                const lat = destino.latitud || 20.101061;
+                const lng = destino.longitud || -98.759131;
+                document.getElementById('btnComoLlegar').href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
                 // Si la calificación promedio viene nula, ponemos 0.0
                 const promedio = destino.calificacionPromedio || 0;
@@ -93,6 +122,21 @@ function generarHTMLResenas(listaResenas, contenedor) {
             ? `<img src="${resena.fotoUsuario}" class="rounded-circle object-fit-cover shadow-sm" style="width: 50px; height: 50px;">`
             : `<div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 1.2rem;">${resena.nombreUsuario.charAt(0).toUpperCase()}</div>`;
 
+        // --- CÓDIGO NUEVO: Galería de fotos de la reseña ---
+        let galeriaHTML = "";
+        if (resena.fotos && resena.fotos.length > 0) {
+            galeriaHTML = '<div class="d-flex gap-2 mt-3 flex-wrap">';
+            resena.fotos.forEach(url => {
+                // Usamos la URL base del backend para que encuentre las imágenes sin importar el puerto
+                const urlBackend = CONFIG.API_URL_BASE.replace('/api/Auth', '').replace('/api/Resena', '').replace('/api', '');
+                galeriaHTML += `<img src="${urlBackend}${url}" 
+                                class="rounded-3 shadow-sm object-fit-cover" 
+                                style="width: 100px; height: 100px; border: 1px solid #eaeaea;">`;
+            });
+            galeriaHTML += '</div>';
+        }
+        // ---------------------------------------------------
+
         const html = `
             <div class="card shadow-sm border-0 rounded-4 mb-3">
                 <div class="card-body p-4">
@@ -107,6 +151,10 @@ function generarHTMLResenas(listaResenas, contenedor) {
                         ${estrellasHTML}
                     </div>
                     <p class="text-secondary mb-0">${resena.comentario}</p>
+                    
+                    <!-- Insertamos la galería justo aquí debajo del texto -->
+                    ${galeriaHTML}
+                    
                 </div>
             </div>
         `;
@@ -136,18 +184,27 @@ function configurarFormularioResena() {
         // Cuidar el ID (dependiendo si se guardó como idUsuario o IdUsuario en JS)
         const idDelUsuario = usuarioSesion.idUsuario || usuarioSesion.IdUsuario;
 
-        const nuevaResena = {
-            calificacion: parseFloat(document.getElementById("inputCalificacion").value),
-            comentario: document.getElementById("inputComentario").value.trim(),
-            idUsuario: idDelUsuario,
-            idDestino: parseInt(idDestinoActual)
-        };
+        // 1. Construimos el FormData (ya NO es un objeto JSON)
+        const formData = new FormData();
+        formData.append("idUsuario", idDelUsuario);
+        formData.append("idDestino", parseInt(idDestinoActual));
+        formData.append("calificacion", document.getElementById("inputCalificacion").value);
+        formData.append("comentario", document.getElementById("inputComentario").value.trim());
+
+        // 2. Extraemos las fotos si el usuario seleccionó alguna
+        const inputFotos = document.getElementById("inputFotosResena");
+        if (inputFotos && inputFotos.files.length > 0) {
+            for (let i = 0; i < inputFotos.files.length; i++) {
+                formData.append("fotos", inputFotos.files[i]);
+            }
+        }
 
         try {
             const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Resena/registrar`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(nuevaResena)
+                // IMPORTANTE: Quitamos el "Content-Type". 
+                // El navegador pondrá automáticamente "multipart/form-data" al ver que es un FormData.
+                body: formData
             });
 
             const resultado = await respuesta.json();
@@ -162,7 +219,7 @@ function configurarFormularioResena() {
                 }, 1500);
 
             } else {
-                mostrarAlertaResena(resultado.respuesta || "No se pudo publicar la reseña.", false);
+                mostrarAlertaResena(resultado.respuesta || resultado.mensaje || "No se pudo publicar la reseña.", false);
             }
         } catch (error) {
             console.error("Error al enviar reseña:", error);
@@ -241,3 +298,31 @@ function actualizarBotonFavorito(esFavorito) {
         btn.style.color = '#528233';
     }
 }
+
+document.getElementById('btnBorrarDestino')?.addEventListener('click', async function (e) {
+    e.preventDefault();
+
+    // Truco de doble confirmación integrado en el HTML
+    if (!this.classList.contains('confirming')) {
+        this.classList.add('confirming');
+        const textoOriginal = this.innerHTML;
+        this.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> ¿Seguro? Clic para borrar';
+
+        // Si no hace clic en 3 segundos, regresa a la normalidad
+        setTimeout(() => {
+            this.classList.remove('confirming');
+            this.innerHTML = textoOriginal;
+        }, 3000);
+        return;
+    }
+
+    // Si llegó aquí, es porque dio el SEGUNDO clic
+    this.innerHTML = "Borrando...";
+    try {
+        const req = await fetch(`${CONFIG.API_URL_BASE}/Destino/eliminar/${idDestinoActual}`, { method: 'DELETE' });
+        const res = await req.json();
+        if (res.isSuccess) {
+            window.location.replace("explorar.html"); // Lo mandamos al inicio
+        }
+    } catch (error) { console.error(error); }
+});

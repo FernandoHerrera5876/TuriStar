@@ -25,8 +25,8 @@
                     <input type="text" id="ndMunicipio" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-medium small mb-1">Enlace a una foto (URL de Google/Internet)</label>
-                    <input type="url" id="ndUrlFoto" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" placeholder="https://ejemplo.com/foto.jpg" required>
+                    <label class="form-label fw-medium small mb-1">Fotografía del lugar (Archivo local)</label>
+                    <input type="file" id="ndUrlFoto" accept="image/*" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" required>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-medium small mb-1">Breve descripción</label>
@@ -34,7 +34,18 @@
                 </div>
 
                 <div id="alertaDestino" class="alert d-none small py-2 text-center"></div>
-
+                <div class="mb-4">
+                    <label class="form-label fw-medium small mb-2">Horarios de apertura (Ej. 09:00 - 18:00 o Cerrado)</label>
+                    <div class="row g-2 small">
+                        <div class="col-4 col-md-3"><input type="text" id="hLu" class="form-control form-control-sm text-center" placeholder="Lunes" value="09:00 - 18:00"></div>
+                        <div class="col-4 col-md-3"><input type="text" id="hMa" class="form-control form-control-sm text-center" placeholder="Martes" value="09:00 - 18:00"></div>
+                        <div class="col-4 col-md-3"><input type="text" id="hMi" class="form-control form-control-sm text-center" placeholder="Miércoles" value="09:00 - 18:00"></div>
+                        <div class="col-4 col-md-3"><input type="text" id="hJu" class="form-control form-control-sm text-center" placeholder="Jueves" value="09:00 - 18:00"></div>
+                        <div class="col-4 col-md-3"><input type="text" id="hVi" class="form-control form-control-sm text-center" placeholder="Viernes" value="09:00 - 18:00"></div>
+                        <div class="col-4 col-md-3"><input type="text" id="hSa" class="form-control form-control-sm text-center" placeholder="Sábado" value="09:00 - 18:00"></div>
+                        <div class="col-4 col-md-3"><input type="text" id="hDo" class="form-control form-control-sm text-center" placeholder="Domingo" value="09:00 - 18:00"></div>
+                    </div>
+                </div>
                 <button type="submit" id="btnGuardarDestino" class="btn bg-turistar-green text-white w-100 fw-bold py-2 rounded-pill">
                     Guardar y Crear Reseña
                 </button>

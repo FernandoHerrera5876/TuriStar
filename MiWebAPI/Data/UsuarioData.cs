@@ -73,7 +73,8 @@ namespace MiWebAPI.Data
                                 {
                                     IdUsuario = Convert.ToInt32(reader["IdUsuario"]),
                                     Nombre = reader["Nombres"].ToString(),
-                                    Correo = reader["Correo"].ToString()
+                                    Correo = reader["Correo"].ToString(),
+                                    EsAdmin = Convert.ToBoolean(reader["ES_ADMIN"])
                                 };
                             }
                         }
@@ -154,6 +155,7 @@ namespace MiWebAPI.Data
                             usuario.FechaNacimiento = Convert.ToDateTime(reader["FECHA_NACIMIENTO"]);
                             usuario.Correo = reader["CORREO"].ToString();
                             usuario.FotoPerfil = reader["FOTO_PERFIL"].ToString();
+                            usuario.EsAdmin = reader.GetSchemaTable().Select("ColumnName = 'ES_ADMIN'").Length > 0 ? Convert.ToBoolean(reader["ES_ADMIN"]) : false;
                         }
                     }
                 }
@@ -163,6 +165,36 @@ namespace MiWebAPI.Data
                 Console.WriteLine("Error: " + ex.Message);
             }
             return usuario;
+        }
+
+        public async Task<Respuesta> Eliminar(long idUsuario)
+        {
+            Respuesta respuesta = new Respuesta();
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_conexion))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_Usuario_Eliminar", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+
+                    await con.OpenAsync();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
+            }
+            return respuesta;
         }
     }
 }

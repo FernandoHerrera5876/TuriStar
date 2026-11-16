@@ -44,7 +44,14 @@ namespace MiWebAPI.Data
                                 Longitud = reader["LONGITUD"] != DBNull.Value ? Convert.ToDecimal(reader["LONGITUD"]) : 0,
                                 CalificacionPromedio = reader["CALIFICACION_PROMEDIO"] != DBNull.Value ? Convert.ToDecimal(reader["CALIFICACION_PROMEDIO"]) : 0,
                                 IdCategoria = Convert.ToInt64(reader["ID_CATEGORIA"]),
-                                UrlFoto = reader["URL_FOTO"] != DBNull.Value ? reader["URL_FOTO"].ToString() : "https://via.placeholder.com/500x300?text=Sin+Foto"
+                                UrlFoto = reader["UrlFoto"] != DBNull.Value ? reader["UrlFoto"].ToString() : "https://via.placeholder.com/500x300?text=Sin+Foto",
+                                HorarioLunes = reader["HORARIO_LUNES"] != DBNull.Value ? reader["HORARIO_LUNES"].ToString() : "Sin dato",
+                                HorarioMartes = reader["HORARIO_MARTES"] != DBNull.Value ? reader["HORARIO_MARTES"].ToString() : "Sin dato",
+                                HorarioMiercoles = reader["HORARIO_MIERCOLES"] != DBNull.Value ? reader["HORARIO_MIERCOLES"].ToString() : "Sin dato",
+                                HorarioJueves = reader["HORARIO_JUEVES"] != DBNull.Value ? reader["HORARIO_JUEVES"].ToString() : "Sin dato",
+                                HorarioViernes = reader["HORARIO_VIERNES"] != DBNull.Value ? reader["HORARIO_VIERNES"].ToString() : "Sin dato",
+                                HorarioSabado = reader["HORARIO_SABADO"] != DBNull.Value ? reader["HORARIO_SABADO"].ToString() : "Sin dato",
+                                HorarioDomingo = reader["HORARIO_DOMINGO"] != DBNull.Value ? reader["HORARIO_DOMINGO"].ToString() : "Sin dato",
                             });
                         }
                     }
@@ -75,7 +82,15 @@ namespace MiWebAPI.Data
                     cmd.Parameters.AddWithValue("@Municipio", destino.Municipio);
                     cmd.Parameters.AddWithValue("@Descripcion", destino.Descripcion);
                     cmd.Parameters.AddWithValue("@UrlFoto", string.IsNullOrEmpty(destino.UrlFoto) ? "https://via.placeholder.com/500?text=Sin+Foto" : destino.UrlFoto);
-
+                    cmd.Parameters.AddWithValue("@Latitud", destino.Latitud);
+                    cmd.Parameters.AddWithValue("@Longitud", destino.Longitud);
+                    cmd.Parameters.AddWithValue("@HLunes", destino.HorarioLunes ?? "09:00 - 18:00");
+                    cmd.Parameters.AddWithValue("@HMartes", destino.HorarioMartes ?? "09:00 - 18:00");
+                    cmd.Parameters.AddWithValue("@HMiercoles", destino.HorarioMiercoles ?? "09:00 - 18:00");
+                    cmd.Parameters.AddWithValue("@HJueves", destino.HorarioJueves ?? "09:00 - 18:00");
+                    cmd.Parameters.AddWithValue("@HViernes", destino.HorarioViernes ?? "09:00 - 18:00");
+                    cmd.Parameters.AddWithValue("@HSabado", destino.HorarioSabado ?? "09:00 - 18:00");
+                    cmd.Parameters.AddWithValue("@HDomingo", destino.HorarioDomingo ?? "09:00 - 18:00");
                     await con.OpenAsync();
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
@@ -95,6 +110,68 @@ namespace MiWebAPI.Data
             }
 
             return (isSuccess, mensaje, idDestino);
+        }
+
+        public async Task<Respuesta> Actualizar(Destino destino)
+        {
+            Respuesta respuesta = new Respuesta();
+            using (SqlConnection con = new SqlConnection(_conexion))
+            {
+                SqlCommand cmd = new SqlCommand("sp_Destino_Actualizar", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@IdDestino", destino.IdDestino);
+                cmd.Parameters.AddWithValue("@Nombre", destino.Nombre);
+                cmd.Parameters.AddWithValue("@Municipio", destino.Municipio);
+                cmd.Parameters.AddWithValue("@Descripcion", destino.Descripcion);
+                cmd.Parameters.AddWithValue("@HLunes", destino.HorarioLunes ?? "09:00 - 18:00");
+                cmd.Parameters.AddWithValue("@HMartes", destino.HorarioMartes ?? "09:00 - 18:00");
+                cmd.Parameters.AddWithValue("@HMiercoles", destino.HorarioMiercoles ?? "09:00 - 18:00");
+                cmd.Parameters.AddWithValue("@HJueves", destino.HorarioJueves ?? "09:00 - 18:00");
+                cmd.Parameters.AddWithValue("@HViernes", destino.HorarioViernes ?? "09:00 - 18:00");
+                cmd.Parameters.AddWithValue("@HSabado", destino.HorarioSabado ?? "09:00 - 18:00");
+                cmd.Parameters.AddWithValue("@HDomingo", destino.HorarioDomingo ?? "09:00 - 18:00");
+
+                await con.OpenAsync();
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                        respuesta.Mensaje = reader["Mensaje"].ToString();
+                    }
+                }
+            }
+            return respuesta;
+        }
+
+        public async Task<Respuesta> Eliminar(long idDestino)
+        {
+            Respuesta respuesta = new Respuesta();
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_conexion))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_Destino_Eliminar", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@IdDestino", idDestino);
+
+                    await con.OpenAsync();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
+            }
+            return respuesta;
         }
     }
 }

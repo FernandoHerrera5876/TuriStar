@@ -42,5 +42,19 @@ namespace MiWebAPI.Controllers
             // Regresamos también el idDestino recién creado
             return Ok(new { isSuccess = true, respuesta = resultado.Mensaje, idDestino = resultado.IdDestino });
         }
+
+        [HttpPut("actualizar")]
+        public async Task<IActionResult> Actualizar([FromBody] Destino req)
+        {
+            var respuesta = await _destinoData.Actualizar(req);
+            return respuesta.IsSuccess ? Ok(new { isSuccess = true, mensaje = respuesta.Mensaje }) : BadRequest(new { isSuccess = false, mensaje = respuesta.Mensaje });
+        }
+
+        [HttpDelete("eliminar/{id}")]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            var res = await _destinoData.Eliminar(id);
+            return res.IsSuccess ? Ok(new { isSuccess = true, mensaje = res.Mensaje }) : BadRequest(new { isSuccess = false });
+        }
     }
 }

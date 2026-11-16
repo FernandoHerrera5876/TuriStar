@@ -14,40 +14,43 @@ namespace MiWebAPI.Data
         }
 
         // Devolvemos una tupla (bool IsSuccess, string Mensaje) en lugar del objeto Respuesta
-        public async Task<(bool IsSuccess, string Mensaje)> Registrar(Resena resena)
+        public async Task<Respuesta> Registrar(Resena resena)
         {
-            bool isSuccess = false;
-            string mensaje = string.Empty;
-
+            Respuesta respuesta = new Respuesta(); // Soluciona el error CS0103
             try
             {
                 using (SqlConnection con = new SqlConnection(_conexion))
                 {
                     SqlCommand cmd = new SqlCommand("sp_Resena_Registrar", con);
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Calificacion", resena.Calificacion);
-                    cmd.Parameters.AddWithValue("@Comentario", resena.Comentario);
                     cmd.Parameters.AddWithValue("@IdUsuario", resena.IdUsuario);
                     cmd.Parameters.AddWithValue("@IdDestino", resena.IdDestino);
+                    cmd.Parameters.AddWithValue("@Calificacion", resena.Calificacion);
+                    cmd.Parameters.AddWithValue("@Comentario", resena.Comentario);
 
                     await con.OpenAsync();
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
-                            isSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
-                            mensaje = reader["Mensaje"].ToString();
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString();
+
+                            if (respuesta.IsSuccess)
+                            {
+                                // Guardamos el ID en la propiedad Objeto (Soluciona el error CS1061 del controlador)
+                                respuesta.Objeto = Convert.ToInt32(reader["IdResenaNueva"]);
+                            }
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                isSuccess = false;
-                mensaje = ex.Message;
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
             }
-
-            return (isSuccess, mensaje);
+            return respuesta;
         }
 
         public async Task<List<Resena>> ObtenerPorDestino(long idDestino)
@@ -66,15 +69,22 @@ namespace MiWebAPI.Data
                     {
                         while (await reader.ReadAsync())
                         {
+                            string fotosBD = reader["FOTOS_RESENA"].ToString();
+                            List<string> listaFotos = new List<string>();
+                            if (!string.IsNullOrEmpty(fotosBD))
+                            {
+                                listaFotos = fotosBD.Split(',').ToList();
+                            }
                             lista.Add(new Resena
                             {
                                 IdResena = Convert.ToInt64(reader["ID_RESENA"]),
                                 Calificacion = Convert.ToDecimal(reader["CALIFICACION"]),
                                 Comentario = reader["COMENTARIO"].ToString(),
-                                FechaCreacion = Convert.ToDateTime(reader["FECHA_CREACION"]),
+                                FechaCreacion = reader["FECHA_CREACION"] != DBNull.Value ? Convert.ToDateTime(reader["FECHA_CREACION"]) : DateTime.Now,
                                 IdUsuario = Convert.ToInt32(reader["ID_USUARIO"]),
                                 NombreUsuario = reader["NombreUsuario"].ToString(),
-                                FotoUsuario = reader["FotoUsuario"] != DBNull.Value ? reader["FotoUsuario"].ToString() : null
+                                FotoUsuario = reader["FotoUsuario"] != DBNull.Value ? reader["FotoUsuario"].ToString() : null,
+                                Fotos = listaFotos
                             });
                         }
                     }
@@ -107,7 +117,7 @@ namespace MiWebAPI.Data
                                 IdResena = Convert.ToInt64(reader["ID_RESENA"]),
                                 Calificacion = Convert.ToDecimal(reader["CALIFICACION"]),
                                 Comentario = reader["COMENTARIO"].ToString(),
-                                FechaCreacion = Convert.ToDateTime(reader["FECHA_CREACION"]),
+                                FechaCreacion = reader["FECHA_CREACION"] != DBNull.Value ? Convert.ToDateTime(reader["FECHA_CREACION"]) : DateTime.Now,
                                 NombreUsuario = reader["NombreUsuario"].ToString(),
                                 FotoUsuario = reader["FotoUsuario"] != DBNull.Value ? reader["FotoUsuario"].ToString() : null,
                                 NombreDestino = reader["NombreDestino"].ToString(),
@@ -140,14 +150,23 @@ namespace MiWebAPI.Data
                     {
                         while (await reader.ReadAsync())
                         {
+                            // Extraer y procesar la cadena de fotos
+                            string fotosBD = reader["FOTOS_RESENA"] != DBNull.Value ? reader["FOTOS_RESENA"].ToString() : "";
+                            List<string> listaFotos = new List<string>();
+                            if (!string.IsNullOrEmpty(fotosBD))
+                            {
+                                listaFotos = fotosBD.Split(',').ToList();
+                            }
+
                             lista.Add(new Resena
                             {
                                 IdResena = Convert.ToInt64(reader["ID_RESENA"]),
                                 Calificacion = Convert.ToDecimal(reader["CALIFICACION"]),
                                 Comentario = reader["COMENTARIO"].ToString(),
-                                FechaCreacion = Convert.ToDateTime(reader["FECHA_CREACION"]),
+                                FechaCreacion = reader["FECHA_CREACION"] != DBNull.Value ? Convert.ToDateTime(reader["FECHA_CREACION"]) : DateTime.Now,
                                 NombreDestino = reader["NombreDestino"].ToString(),
-                                IdDestino = Convert.ToInt64(reader["ID_DESTINO"])
+                                IdDestino = Convert.ToInt64(reader["ID_DESTINO"]),
+                                Fotos = listaFotos // Agregamos la lista de fotos al objeto
                             });
                         }
                     }
@@ -158,6 +177,76 @@ namespace MiWebAPI.Data
                 Console.WriteLine("Error: " + ex.Message);
             }
             return lista;
+        }
+
+        public async Task<Respuesta> Actualizar(Resena resena)
+        {
+            Respuesta respuesta = new Respuesta();
+            using (SqlConnection con = new SqlConnection(_conexion))
+            {
+                SqlCommand cmd = new SqlCommand("sp_Resena_Actualizar", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@IdResena", resena.IdResena);
+                cmd.Parameters.AddWithValue("@IdUsuario", resena.IdUsuario);
+                cmd.Parameters.AddWithValue("@Calificacion", resena.Calificacion);
+                cmd.Parameters.AddWithValue("@Comentario", resena.Comentario);
+
+                await con.OpenAsync();
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                        respuesta.Mensaje = reader["Mensaje"].ToString();
+                    }
+                }
+            }
+            return respuesta;
+        }
+
+        public async Task InsertarFotoResena(int idResena, string urlFoto)
+        {
+            using (SqlConnection con = new SqlConnection(_conexion))
+            {
+                SqlCommand cmd = new SqlCommand("sp_FotoResena_Registrar", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@IdResena", idResena);
+                cmd.Parameters.AddWithValue("@UrlFoto", urlFoto);
+                await con.OpenAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+
+        public async Task<Respuesta> Eliminar(int idResena, int idUsuario)
+        {
+            Respuesta respuesta = new Respuesta(); // <-- ¡Faltaba declarar esta variable!
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_conexion))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_Resena_Eliminar", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@IdResena", idResena);
+                    cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+
+                    await con.OpenAsync();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
+            }
+
+            return respuesta;
         }
     }
 }

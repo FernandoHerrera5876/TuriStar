@@ -55,6 +55,7 @@
                 <div class="hero-overlay d-flex align-items-end pb-4">
                     <div class="container">
                         <h1 id="detalleNombre" class="text-white fw-bold display-4 mb-2">Nombre del Destino</h1>
+                        <h1 id="detalleNombre" class="fw-bold text-dark mb-1"></h1>
                         <p class="text-white-50 fs-5 mb-0">
                             <i class="bi bi-geo-alt-fill text-success"></i> <span id="detalleMunicipio">Municipio</span>, Hidalgo
                         </p>
@@ -84,7 +85,8 @@
                                     </div>
                                     <div>
                                         <h6 class="fw-bold mb-0">Horarios</h6>
-                                        <small id="detalleHorarios" class="text-muted">Cargando...</small>
+                                        <ul id="listaHorariosSemana" class="list-unstyled small text-secondary mt-2">
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -108,9 +110,11 @@
                                     <div class="bg-white rounded-circle p-3 shadow-sm text-success">
                                         <i class="bi bi-signpost-split fs-4"></i>
                                     </div>
-                                    <div>
-                                        <h6 class="fw-bold mb-0">¿Cómo llegar?</h6>
-                                        <small id="detalleComoLlegar" class="text-muted">Cargando instrucciones...</small>
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold text-success mb-2"><i class="bi bi-map-fill"></i> ¿Cómo llegar?</h6>
+                                        <a id="btnComoLlegar" href="#" target="_blank" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-medium">
+                                            <i class="bi bi-sign-turn-right-fill"></i> Abrir en Google Maps
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -149,6 +153,13 @@
                                         <label class="form-label fw-medium small mb-1">Tu reseña</label>
                                         <textarea class="form-control border-0 shadow-sm p-3" id="inputComentario" rows="4" placeholder="¿Qué te pareció este lugar? Comparte tu experiencia..." required></textarea>
                                     </div>
+
+                                    <!-- CAMPO AGREGADO PARA SUBIR FOTOS MÚLTIPLES -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-medium small mb-1">Añadir fotos (Opcional)</label>
+                                        <input type="file" id="inputFotosResena" class="form-control border-0 shadow-sm" accept="image/*" multiple>
+                                    </div>
+
                                     <div id="alertaResena" class="alert d-none small py-2 text-center" role="alert"></div>
                                     <button type="submit" id="btnEnviarResena" class="btn bg-turistar-green text-white px-4 py-3 rounded-pill fw-bold w-100">
                                         Publicar Reseña
@@ -171,8 +182,14 @@
                             <button id="btnGuardarFavorito" class="btn btn-outline-success rounded-pill w-100 mb-2 fw-medium py-2" style="border-color: #528233; color: #528233;">
                                 <i class="bi bi-bookmark-heart"></i> Guardar en favoritos
                             </button>
-                            <a href="mapa.html" class="btn bg-turistar-green text-white rounded-pill w-100 fw-medium py-2">
+                            <a href="mapa.html" class="btn bg-turistar-green text-white rounded-pill w-100 fw-medium py-2 mb-2">
                                 <i class="bi bi-map"></i> Ver en el Mapa
+                            </a>
+                            <a id="btnEditarDestino" href="#" class="btn btn-warning rounded-pill w-100 d-none fw-medium py-2 text-dark">
+                                <i class="bi bi-pencil-fill"></i> Editar Lugar
+                            </a>
+                            <a id="btnBorrarDestino" href="#" class="btn btn-danger rounded-pill w-100 d-none fw-medium py-2 mt-2">
+                                <i class="bi bi-trash-fill"></i> Borrar Lugar
                             </a>
                         </div>
                     </div>

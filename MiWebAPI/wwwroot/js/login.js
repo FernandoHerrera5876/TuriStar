@@ -57,7 +57,14 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
 
         if (respuesta.ok && resultado.isSuccess) {
             localStorage.setItem('usuarioTuriStar', JSON.stringify(resultado.objeto));
-            window.location.replace("index.html");
+
+            const esAdministrador = resultado.objeto.esAdmin || resultado.objeto.EsAdmin;
+
+            if (esAdministrador) {
+                window.location.replace("dashboard.html");
+            } else {
+                window.location.replace("explorar.html");
+            }
         } else {
             mostrarAlerta(resultado.respuesta || resultado.mensaje || "Credenciales incorrectas.", false);
         }

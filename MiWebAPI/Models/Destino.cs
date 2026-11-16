@@ -15,5 +15,12 @@
         public decimal CalificacionPromedio { get; set; }
         public long IdCategoria { get; set; }
         public string? UrlFoto { get; set; }
+        public string? HorarioLunes { get; set; }
+        public string? HorarioMartes { get; set; }
+        public string? HorarioMiercoles { get; set; }
+        public string? HorarioJueves { get; set; }
+        public string? HorarioViernes { get; set; }
+        public string? HorarioSabado { get; set; }
+        public string? HorarioDomingo { get; set; }
     }
 }

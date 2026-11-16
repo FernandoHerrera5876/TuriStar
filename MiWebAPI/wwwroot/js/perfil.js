@@ -7,7 +7,16 @@
     }
 
     const usuarioSesion = JSON.parse(usuarioGuardado);
-    const idUsuario = usuarioSesion.idUsuario || usuarioSesion.IdUsuario;
+
+    // SOLUCIÓN: Aseguramos la extracción del ID y lo convertimos a entero
+    const idUsuario = parseInt(usuarioSesion.idUsuario || usuarioSesion.IdUsuario);
+
+    // Si el idUsuario es inválido (NaN o 0), sacamos al usuario por seguridad
+    if (!idUsuario || isNaN(idUsuario)) {
+        localStorage.removeItem('usuarioTuriStar');
+        window.location.replace("login.html");
+        return;
+    }
 
     // Ponemos el nombre base mientras llegan los datos
     document.getElementById('perfilNombre').textContent = usuarioSesion.nombre || 'Cargando...';
@@ -48,7 +57,7 @@ async function cargarMisResenas(idUsuario) {
     const contenedor = document.getElementById('contenedorResenas');
 
     try {
-        // Ahora SÍ consultamos la base de datos real
+        // Consultamos la base de datos real
         const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Resena/usuario/${idUsuario}`);
         const resultado = await respuesta.json();
 
@@ -67,6 +76,19 @@ async function cargarMisResenas(idUsuario) {
 
                 const fecha = new Date(resena.fechaCreacion).toLocaleDateString();
 
+                // Galería de fotos de la reseña
+                let galeriaHTML = "";
+                if (resena.fotos && resena.fotos.length > 0) {
+                    galeriaHTML = '<div class="d-flex gap-2 mt-3 flex-wrap">';
+                    resena.fotos.forEach(url => {
+                        const urlBackend = CONFIG.API_URL_BASE.replace('/api/Auth', '').replace('/api/Resena', '').replace('/api', '');
+                        galeriaHTML += `<img src="${urlBackend}${url}" 
+                                        class="rounded-3 shadow-sm object-fit-cover" 
+                                        style="width: 100px; height: 100px; border: 1px solid #eaeaea;">`;
+                    });
+                    galeriaHTML += '</div>';
+                }
+
                 const html = `
                     <div class="card shadow-sm border-0 rounded-4 mb-3">
                         <div class="card-body p-4">
@@ -78,9 +100,23 @@ async function cargarMisResenas(idUsuario) {
                                 ${estrellasHTML}
                             </div>
                             <p class="text-secondary mb-3">${resena.comentario}</p>
-                            <a href="detalle.html?id=${resena.idDestino}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                Ver lugar
-                            </a>
+                            
+                            <!-- Galería de fotos locales de la reseña -->
+                            ${galeriaHTML}
+
+                            <div class="mt-3">
+                                <a href="detalle.html?id=${resena.idDestino}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-2">Ver lugar</a>
+                                
+                                <!-- BOTÓN DE EDITAR -->
+                                <button onclick="abrirModalEdicion(${resena.idResena}, ${resena.calificacion}, \`${resena.comentario.replace(/`/g, '')}\`)" class="btn btn-sm btn-warning rounded-pill px-3 text-dark fw-medium me-2">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </button>
+                                
+                                <!-- BOTÓN DE BORRAR (Con doble confirmación y texto visible) -->
+                                <button onclick="borrarMiResena(this, ${resena.idResena})" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                    <i class="bi bi-trash"></i> Borrar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -118,7 +154,6 @@ document.getElementById('tabGuardados').addEventListener('click', async (e) => {
     e.preventDefault();
     cambiarPestana('tabGuardados', 'tabResenas', 'contenedorGuardados', 'contenedorResenas');
 
-    // Cargar los favoritos al darle clic a la pestaña
     const usuarioSesion = JSON.parse(localStorage.getItem('usuarioTuriStar'));
     await cargarMisGuardados(usuarioSesion.idUsuario || usuarioSesion.IdUsuario);
 });
@@ -175,4 +210,141 @@ async function cargarMisGuardados(idUsuario) {
             `;
         }
     } catch (error) { console.error("Error al cargar favoritos", error); }
+}
+
+let modalEdicionInstance = null;
+
+function abrirModalEdicion(idResena, calificacionActual, comentarioActual) {
+    document.getElementById('editIdResena').value = idResena;
+    document.getElementById('editCalificacion').value = calificacionActual;
+    document.getElementById('editComentario').value = comentarioActual;
+
+    document.getElementById('alertaEditarResena').classList.add('d-none');
+
+    if (!modalEdicionInstance) {
+        modalEdicionInstance = new bootstrap.Modal(document.getElementById('modalEditarResena'));
+    }
+    modalEdicionInstance.show();
+}
+
+document.getElementById('btnGuardarEdicionResena').addEventListener('click', async () => {
+    const btn = document.getElementById('btnGuardarEdicionResena');
+    const alerta = document.getElementById('alertaEditarResena');
+
+    const idResena = document.getElementById('editIdResena').value;
+    const calificacion = document.getElementById('editCalificacion').value;
+    const comentario = document.getElementById('editComentario').value.trim();
+
+    const usuarioSesion = JSON.parse(localStorage.getItem('usuarioTuriStar'));
+    if (!usuarioSesion) return;
+
+    if (!comentario) {
+        alerta.textContent = "El comentario no puede ir vacío.";
+        alerta.className = "alert alert-danger d-block small py-2 text-center mt-2";
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Actualizando...";
+    alerta.classList.add('d-none');
+
+    try {
+        const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Resena/actualizar`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                IdResena: parseInt(idResena),
+                IdUsuario: usuarioSesion.idUsuario || usuarioSesion.IdUsuario,
+                Calificacion: parseFloat(calificacion),
+                Comentario: comentario
+            })
+        });
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok && resultado.isSuccess) {
+            alerta.textContent = "¡Reseña actualizada correctamente!";
+            alerta.className = "alert alert-success d-block small py-2 text-center mt-2";
+
+            setTimeout(() => {
+                modalEdicionInstance.hide();
+                cargarMisResenas(usuarioSesion.idUsuario || usuarioSesion.IdUsuario);
+            }, 1500);
+        } else {
+            alerta.textContent = resultado.mensaje || "Error al actualizar.";
+            alerta.className = "alert alert-danger d-block small py-2 text-center mt-2";
+        }
+    } catch (error) {
+        alerta.textContent = "Error de conexión con el servidor.";
+        alerta.className = "alert alert-danger d-block small py-2 text-center mt-2";
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Actualizar Reseña";
+    }
+});
+
+
+// ===================================================================================
+// SECCIÓN CRÍTICA DE BOTONES (Sin error de this)
+// ===================================================================================
+
+// --- ACCIÓN DEL BOTÓN CERRAR SESIÓN ---
+function cerrarSesionPerfil() {
+    localStorage.removeItem('usuarioTuriStar');
+    window.location.replace("login.html");
+}
+
+// --- ACCIÓN DEL BOTÓN ELIMINAR CUENTA (Doble confirmación) ---
+async function borrarCuentaPerfil(btn) {
+    if (!btn.classList.contains('confirming')) {
+        btn.classList.add('confirming', 'btn-danger', 'text-white');
+        btn.classList.remove('btn-outline-danger');
+        const txtOrg = btn.innerHTML;
+        btn.innerHTML = '¡Es irreversible! Clic para borrar cuenta';
+
+        setTimeout(() => {
+            btn.classList.remove('confirming', 'btn-danger', 'text-white');
+            btn.classList.add('btn-outline-danger');
+            btn.innerHTML = txtOrg;
+        }, 3000);
+        return;
+    }
+
+    const usr = JSON.parse(localStorage.getItem('usuarioTuriStar'));
+    if (!usr) return;
+
+    const id = usr.idUsuario || usr.IdUsuario;
+    try {
+        const req = await fetch(`${CONFIG.API_URL_BASE}/Usuario/eliminar/${id}`, { method: 'DELETE' });
+        if (req.ok) {
+            localStorage.removeItem('usuarioTuriStar');
+            window.location.replace("login.html");
+        }
+    } catch (error) {
+        console.error("Error al eliminar la cuenta:", error);
+    }
+}
+
+// --- ACCIÓN PARA BORRAR UNA RESEÑA (Doble confirmación) ---
+async function borrarMiResena(btn, idResena) {
+    if (!btn.classList.contains('confirming')) {
+        btn.classList.add('confirming', 'btn-danger', 'text-white');
+        btn.classList.remove('btn-outline-danger');
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> ¿Borrar?';
+        setTimeout(() => {
+            btn.classList.remove('confirming', 'btn-danger', 'text-white');
+            btn.classList.add('btn-outline-danger');
+            btn.innerHTML = '<i class="bi bi-trash"></i> Borrar';
+        }, 3000);
+        return;
+    }
+
+    const usr = JSON.parse(localStorage.getItem('usuarioTuriStar'));
+    const idUsr = usr.idUsuario || usr.IdUsuario;
+
+    try {
+        const req = await fetch(`${CONFIG.API_URL_BASE}/Resena/eliminar/${idResena}/${idUsr}`, { method: 'DELETE' });
+        if (req.ok) {
+            cargarMisResenas(idUsr);
+        }
+    } catch (error) { console.error(error); }
 }

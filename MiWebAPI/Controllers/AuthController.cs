@@ -92,5 +92,12 @@ namespace MiWebAPI.Controllers
 
             return Ok(new { isSuccess = true, objeto = usuario });
         }
+
+        [HttpDelete("eliminar/{id}")]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            var res = await _usuarioData.Eliminar(id);
+            return res.IsSuccess ? Ok(new { isSuccess = true, mensaje = res.Mensaje }) : BadRequest(new { isSuccess = false });
+        }
     }
 }

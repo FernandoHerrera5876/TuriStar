@@ -11,5 +11,6 @@
         public string? NombreUsuario { get; set; }
         public string? FotoUsuario { get; set; }
         public string? NombreDestino { get; set; }
+        public List<string>? Fotos { get; set; }
     }
 }
