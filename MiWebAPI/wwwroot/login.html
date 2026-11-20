@@ -13,26 +13,36 @@
         }
 
         .hero-image {
-            /* Se corrigió la URL de la imagen para asegurar que cargue */
             background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%), url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
             height: 100%;
             border-radius: 0 20px 20px 0;
         }
 
+        /* La tarjeta usa .destination-card (borde neón); aquí solo quitamos el salto al pasar el mouse */
+        .login-card.destination-card:hover {
+            transform: none;
+        }
+
+        /* Pestañas adaptadas al tema oscuro */
         .tab-active {
-            border-bottom: 2px solid #528233;
-            color: #528233;
-            font-weight: 500;
+            border-bottom: 2px solid #4ade80;
+            color: #4ade80;
+            font-weight: 600;
             padding-bottom: 8px;
             cursor: pointer;
         }
 
         .tab-inactive {
-            color: #6c757d;
-            border-bottom: 1px solid #dee2e6;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding-bottom: 8px;
             cursor: pointer;
+            transition: color 0.2s ease;
         }
+
+            .tab-inactive:hover {
+                color: #e2e8f0;
+            }
 
         .form-section {
             display: none;
@@ -41,6 +51,37 @@
             .form-section.active {
                 display: block;
             }
+
+        /* Botón secundario: pastilla con borde verde, combina con .btn-glass-ios */
+        .btn-outline-glass {
+            background: transparent;
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            color: #4ade80 !important;
+            font-weight: 600;
+            border-radius: 50rem;
+            padding: 0.65rem 1.8rem;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+            .btn-outline-glass:hover {
+                background: rgba(74, 222, 128, 0.12);
+                border-color: #4ade80;
+                transform: translateY(-2px);
+            }
+
+        /* Inputs: placeholder y autocompletado del navegador (evita el fondo azul claro) */
+        .input-yellow::placeholder {
+            color: #64748b !important;
+        }
+
+        .input-yellow:-webkit-autofill,
+        .input-yellow:-webkit-autofill:hover,
+        .input-yellow:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #162235 inset !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #ffffff;
+            border: 1px solid #283852 !important;
+        }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -60,7 +101,7 @@
 
         <!-- Formularios -->
         <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4 overflow-auto">
-            <div class="card shadow-sm border-0 rounded-4" style="max-width: 420px; width: 100%;">
+            <div class="card destination-card login-card rounded-4" style="max-width: 420px; width: 100%;">
                 <div class="card-body p-4 p-md-5">
 
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
@@ -87,9 +128,9 @@
                             <label class="form-label fw-medium small mb-1">Contraseña</label>
                             <input id="loginPassword" type="password" class="form-control input-yellow p-2" required>
                         </div>
-                        <button id="btnLogin" type="submit" class="btn bg-turistar-green text-white w-100 py-2 mb-3 fw-medium rounded-3">Iniciar Sesión</button>
+                        <button id="btnLogin" type="submit" class="btn btn-glass-ios w-100 mb-3">Iniciar Sesión</button>
                         <!-- type="button" evita que el botón envíe el formulario o recargue la página -->
-                        <button type="button" class="btn btn-outline-success w-100 py-2 fw-medium rounded-3" onclick="switchTab('registro')">Crear una Cuenta Nueva</button>
+                        <button type="button" class="btn btn-outline-glass w-100" onclick="switchTab('registro')">Crear una Cuenta Nueva</button>
                     </form>
 
                     <!-- Formulario de Registro -->
@@ -114,8 +155,8 @@
                             <label class="form-label fw-medium small mb-1">Contraseña</label>
                             <input id="regPassword" type="password" class="form-control input-yellow p-2" placeholder="••••••••••••" required>
                         </div>
-                        <button id="btnRegistro" type="submit" class="btn bg-turistar-green text-white w-100 py-2 mb-3 fw-medium rounded-3">Crear cuenta</button>
-                        <button type="button" class="btn btn-outline-secondary w-100 py-2 fw-medium rounded-3" onclick="switchTab('login')">Volver a Iniciar Sesión</button>
+                        <button id="btnRegistro" type="submit" class="btn btn-glass-ios w-100 mb-3">Crear cuenta</button>
+                        <button type="button" class="btn btn-outline-glass w-100" onclick="switchTab('login')">Volver a Iniciar Sesión</button>
                     </form>
 
                 </div>

@@ -1,62 +1,493 @@
-/* css/styles.css */
+/* ==========================================================
+1. TIPOGRAFÍA MODERNA MINIMALISTA (PLUS JAKARTA SANS)
+   ========================================================== */
 body {
-    background-color: #fdfaf6;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: #111D33;
+    background-color: #0b1320 !important;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    color: #e2e8f0 !important;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
 }
 
-.navbar-turistar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #eaeaea;
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    letter-spacing: -0.02em !important;
+}
+
+h1, h2, h3, h4, h5, h6, .text-dark {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.text-muted {
+    color: #94a3b8 !important;
 }
 
 .text-turistar-green {
-    color: #528233 !important;
+    color: #4ade80 !important;
 }
 
 .bg-turistar-green {
-    background-color: #528233 !important;
-    border-color: #528233 !important;
+    background-color: #22c55e !important;
+    border-color: #22c55e !important;
 }
 
     .bg-turistar-green:hover {
-        background-color: #406827 !important;
+        background-color: #16a34a !important;
     }
 
+/* Inputs oscuros elegantes con contraste claro */
 .input-yellow {
-    background-color: #fcf8ee !important;
-    border: 1px solid #f2e9d8 !important;
+    background-color: #162235 !important;
+    border: 1px solid #2b3f5e !important;
+    color: #f8fafc !important;
 }
 
+    .input-yellow::placeholder {
+        color: #cbd5e1 !important;
+        opacity: 0.85;
+    }
+
     .input-yellow:focus {
-        box-shadow: 0 0 0 0.25rem rgba(82, 130, 51, 0.25);
-        border-color: #528233 !important;
+        background-color: #1a2a42 !important;
+        box-shadow: 0 0 0 0.25rem rgba(74, 222, 128, 0.24) !important;
+        border-color: #4ade80 !important;
+        color: #ffffff !important;
     }
 
 .rating-badge {
-    background-color: #fcf8ee;
-    color: #d97706;
+    background-color: #162235;
+    color: #fbbf24;
     font-weight: 600;
     font-size: 0.8rem;
     padding: 3px 6px;
     border-radius: 6px;
+    border: 1px solid #283852;
 }
 
-.destination-card {
-    border: none;
-    border-radius: 14px;
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    background: #ffffff;
+
+/* ==========================================================
+2. NAVBAR CON EFECTO BLUR DE CRISTAL OSCURO DINÁMICO
+   ========================================================== */
+#navbar-placeholder {
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    display: block;
+    width: 100%;
 }
 
-    .destination-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1) !important;
+#mainNavbar, .navbar-turistar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1050 !important;
+    background: rgba(13, 24, 44, 0.82) !important;
+    backdrop-filter: blur(18px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(190%) !important;
+    border-bottom: 1px solid rgba(74, 222, 128, 0.18) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28) !important;
+    transition: all 0.3s ease-in-out !important;
+    transform: translateZ(0);
+}
+
+    .navbar-turistar .nav-link,
+    .navbar-turistar .navbar-brand,
+    .navbar-turistar .navbar-brand .text-dark,
+    .navbar-turistar .navbar-brand .fw-bold {
+        color: #ffffff !important;
     }
 
-.nav-link.active {
-    color: #528233 !important;
-    font-weight: bold;
-    border-bottom: 2px solid #528233;
+        .navbar-turistar .navbar-brand .text-secondary {
+            color: rgba(226, 232, 240, 0.78) !important;
+        }
+
+        .navbar-turistar .nav-link:hover,
+        .navbar-turistar .nav-link.active {
+            color: #4ade80 !important;
+        }
+
+    /* Estado cuando haces scroll hacia abajo */
+    .navbar-turistar.navbar-scrolled,
+    #mainNavbar.navbar-scrolled {
+        background: rgba(11, 20, 38, 0.95) !important;
+        backdrop-filter: blur(22px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(22px) saturate(200%) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+        padding-top: 0.45rem !important;
+        padding-bottom: 0.45rem !important;
+        border-bottom: 1px solid rgba(74, 222, 128, 0.35) !important;
+    }
+
+    .navbar-turistar #loginLink {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+        .navbar-turistar #loginLink:hover {
+            background-color: rgba(74, 222, 128, 0.16) !important;
+            border-color: #4ade80 !important;
+        }
+
+
+/* ==========================================================
+3. TARJETAS CON BORDE DE LUZ NEÓN ANIMADO
+   ========================================================== */
+@keyframes borderRotate {
+    0% {
+        border-color: rgba(74, 222, 128, 0.25);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+    }
+
+    50% {
+        border-color: rgba(56, 189, 248, 0.65);
+        box-shadow: 0 0 26px rgba(74, 222, 128, 0.28), inset 0 0 14px rgba(56, 189, 248, 0.08);
+    }
+
+    100% {
+        border-color: rgba(74, 222, 128, 0.25);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+    }
 }
+
+.destination-card, .feature-card {
+    border: 1.5px solid rgba(74, 222, 128, 0.38) !important;
+    border-radius: 16px;
+    background: linear-gradient(160deg, #152238 0%, #101929 100%) !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+    animation: borderRotate 4.5s ease-in-out infinite;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease !important;
+}
+
+    .destination-card:hover, .feature-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        border-color: #4ade80 !important;
+        box-shadow: 0 0 38px rgba(74, 222, 128, 0.48), 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+        animation: none;
+        z-index: 50;
+    }
+
+.feature-icon {
+    color: #4ade80 !important;
+    filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.7));
+}
+
+
+/* ==========================================================
+4. ESTILOS DEL CARRUSEL AUTOMÁTICO / INDICADORES (CIAN / VERDE)
+   ========================================================== */
+.carousel-indicators [data-bs-target] {
+    background-color: rgba(56, 189, 248, 0.38);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.carousel-indicators .active {
+    background-color: #4ade80 !important;
+    width: 24px;
+    border-radius: 50rem;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.65);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.55));
+}
+
+.carousel-item {
+    transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+
+/* ==========================================================
+5. CARRUSEL INFINITO CON EFECTO SCROLL DINÁMICO (BLUR REVEAL)
+   ========================================================== */
+.marquee-container {
+    position: relative;
+    width: 100%;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    overflow: visible !important;
+    will-change: transform;
+}
+
+.marquee-track {
+    display: flex;
+    gap: 30px;
+    width: max-content;
+    animation: scrollMarquee 28s linear infinite !important;
+    overflow: visible !important;
+}
+
+.marquee-container:hover .marquee-track {
+    animation-play-state: paused !important;
+}
+
+.marquee-item {
+    width: 340px;
+    flex-shrink: 0;
+    overflow: visible !important;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+@keyframes scrollMarquee {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(calc(-50% - 15px));
+    }
+}
+
+
+/* ==========================================================
+6. BOTONES CON EFECTO VIDRIO ESTILO IOS (GLASSMORPHISM)
+   ========================================================== */
+.btn-glass-ios {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.24), rgba(14, 165, 233, 0.16));
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.42);
+    border-left: 1px solid rgba(255, 255, 255, 0.22);
+    border-right: 1px solid rgba(255, 255, 255, 0.22);
+    border-bottom: 1px solid rgba(74, 222, 128, 0.45);
+    color: #ffffff !important;
+    font-weight: 600;
+    border-radius: 50rem;
+    padding: 0.65rem 1.8rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.38), inset 0 1px 1px 0 rgba(255, 255, 255, 0.35) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+    .btn-glass-ios:hover {
+        background: linear-gradient(135deg, rgba(74, 222, 128, 0.34), rgba(56, 189, 248, 0.22)) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.7) !important;
+        border-color: #4ade80 !important;
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 12px 36px rgba(74, 222, 128, 0.35), inset 0 1px 2px 0 rgba(255, 255, 255, 0.55) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-glass-ios:active {
+        transform: translateY(1px) scale(0.98);
+    }
+
+    .btn-glass-ios::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-glass-ios:hover::before {
+        left: 100%;
+    }
+
+    .btn-glass-ios.btn-sm {
+        padding: 0.35rem 1rem !important;
+        font-size: 0.82rem !important;
+    }
+
+
+/* ==========================================================
+7. BOTÓN SALIR / CERRAR SESIÓN ROJO DE ALTO CONTRASTE (BLINDADO)
+   ========================================================== */
+#btnCerrarSesion,
+.navbar-turistar #btnCerrarSesion,
+.btn-glass-ios-red {
+    position: relative;
+    overflow: hidden;
+    background: rgba(220, 38, 38, 0.48) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.55) !important;
+    border-left: 1px solid rgba(255, 150, 150, 0.35) !important;
+    border-right: 1px solid rgba(255, 150, 150, 0.35) !important;
+    border-bottom: 1px solid rgba(248, 113, 113, 0.65) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 50rem !important;
+    padding: 0.38rem 1.1rem !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+}
+
+    #btnCerrarSesion:hover,
+    .btn-glass-ios-red:hover {
+        background: rgba(239, 68, 68, 0.68) !important;
+        border-color: #f87171 !important;
+        color: #ffffff !important;
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+    }
+
+    /* Si el botón Salir está oculto (d-none), que de verdad se oculte */
+    #btnCerrarSesion.d-none,
+    .navbar-turistar #btnCerrarSesion.d-none {
+        display: none !important;
+    }
+
+
+/* ==========================================================
+8. EFECTO CORTINA DINÁMICA (SOLO DONDE APLIQUE .curtain-main)
+   ========================================================== */
+main.curtain-main {
+    position: relative;
+    z-index: 10;
+    margin-top: -32px !important;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: #0b1320 !important;
+    box-shadow: 0 -20px 45px rgba(0, 0, 0, 0.75);
+}
+
+
+/* ==========================================================================
+   FOOTER GLOBAL TURISTAR (DARK GLASSMORPHISM + IOS GLASS)
+   ========================================================================== */
+.turistar-footer {
+    background: linear-gradient(180deg, rgba(11, 19, 32, 0.72) 0%, rgba(7, 13, 24, 0.98) 100%);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border-top: 1px solid rgba(74, 222, 128, 0.25);
+    color: #e2e8f0;
+    box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.45);
+}
+
+.turistar-footer-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.45);
+    color: #4ade80;
+    box-shadow: 0 0 16px rgba(74, 222, 128, 0.22);
+}
+
+.turistar-footer-pill {
+    background: rgba(74, 222, 128, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.turistar-footer-link {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.22s ease, transform 0.22s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+    .turistar-footer-link:hover {
+        color: #4ade80;
+        transform: translateX(3px);
+    }
+
+    .turistar-footer-link i {
+        font-size: 0.7rem;
+        color: rgba(74, 222, 128, 0.65);
+    }
+
+.turistar-footer-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: rgba(22, 35, 58, 0.85);
+    border: 1px solid rgba(74, 222, 128, 0.32);
+    color: #e2e8f0;
+    transition: all 0.25s ease;
+}
+
+    .turistar-footer-icon-btn:hover {
+        background: rgba(74, 222, 128, 0.22);
+        border-color: #4ade80;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 0 16px rgba(74, 222, 128, 0.3);
+    }
+
+.turistar-footer-cta {
+    background: linear-gradient(155deg, rgba(22, 35, 58, 0.9) 0%, rgba(12, 20, 34, 0.96) 100%);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.turistar-footer-glass-btn {
+    position: relative;
+    overflow: hidden;
+    background: rgba(74, 222, 128, 0.2);
+    backdrop-filter: blur(14px) saturate(170%);
+    -webkit-backdrop-filter: blur(14px) saturate(170%);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(74, 222, 128, 0.55);
+    color: #ffffff !important;
+    font-weight: 700;
+    border-radius: 50rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 16px rgba(74, 222, 128, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    transition: all 0.25s ease;
+}
+
+    .turistar-footer-glass-btn:hover {
+        background: rgba(74, 222, 128, 0.34);
+        border-color: #4ade80;
+        transform: translateY(-2px);
+        box-shadow: 0 0 24px rgba(74, 222, 128, 0.42);
+    }
+
+.turistar-footer-divider {
+    border-color: rgba(148, 163, 184, 0.14);
+    opacity: 1;
+}
+
+.turistar-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+    display: inline-block;
+}
+
+.btn-crystal-ios-neutral {
+    background: linear-gradient(135deg, rgba(35, 56, 92, 0.94) 0%, rgba(22, 36, 61, 0.96) 100%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
+    border-left: 1px solid rgba(148, 163, 184, 0.45) !important;
+    border-right: 1px solid rgba(148, 163, 184, 0.45) !important;
+    border-bottom: 1px solid rgba(74, 222, 128, 0.55) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+    .btn-crystal-ios-neutral:hover {
+        background: linear-gradient(135deg, rgba(46, 73, 118, 0.98) 0%, rgba(28, 46, 77, 0.98) 100%) !important;
+        border-color: #4ade80 !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 0 22px rgba(74, 222, 128, 0.28), 0 12px 24px rgba(0, 0, 0, 0.55) !important;
+    }

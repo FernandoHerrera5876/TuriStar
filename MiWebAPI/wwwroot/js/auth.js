@@ -1,26 +1,30 @@
-const SESSION_KEY = "empleados_usuario";
+// js/auth.js
+// Misma clave y mismo almacenamiento que usan login.js, components.js y perfil.js
+const SESSION_KEY_S = "usuarioTuriStar";
 
 function obtenerUsuario() {
-  const valor = sessionStorage.getItem(SESSION_KEY);
-  try {
-    return valor ? JSON.parse(valor) : null;
-  } catch {
-    sessionStorage.removeItem(SESSION_KEY);
-    return null;
-  }
+    const valor = localStorage.getItem(SESSION_KEY_S);
+    try {
+        return valor ? JSON.parse(valor) : null;
+    } catch {
+        localStorage.removeItem(SESSION_KEY_S);
+        return null;
+    }
 }
 
 function protegerPagina() {
-  if (!obtenerUsuario()) window.location.replace("login.html");
+    if (!obtenerUsuario()) {
+        window.location.replace("login.html");
+    }
 }
 
-function mostrarUsuario(elementId) {
-  const usuario = obtenerUsuario();
-  const elemento = document.getElementById(elementId);
-  if (usuario && elemento) elemento.textContent = usuario.nombre;
-}
+// Los botones Ingresar / Salir / saludo los maneja components.js (navbar).
+// Se deja esta función vacía por si alguna página todavía la llama.
+function mostrarUsuario() { }
 
+// Igual que la de components.js, así no importa cuál se cargue al final
 function cerrarSesion() {
-  sessionStorage.removeItem(SESSION_KEY);
-  window.location.replace("login.html");
+    localStorage.removeItem(SESSION_KEY_S);
+    sessionStorage.removeItem("empleados_usuario"); // clave vieja, por limpieza
+    window.location.replace("login.html");
 }

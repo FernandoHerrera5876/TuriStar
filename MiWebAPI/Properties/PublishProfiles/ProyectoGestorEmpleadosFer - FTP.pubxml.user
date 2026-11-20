@@ -7,5 +7,8 @@ by editing this MSBuild file. In order to learn more about this please visit htt
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAxnXYHOTibE6J0ZLy8wKymAAAAAACAAAAAAAQZgAAAAEAACAAAAASunRYbpNGt9k2aE68oCP0evZ1rirlxX5jmis0ZTDZYgAAAAAOgAAAAAIAACAAAABFSvtXv/OJGZSJK7ra5BPurDN0QpUlRVh6wK+ZEjzpPIAAAACuQu4UNMyThlpW1uxkJzYjnfEAvJkpK4NnI2onuYjv2YcGXeWHdEhtxPxV3VC/hNd720DkoklQo/sl33LXTVlBRygwiQUMaNW1Y/TiUIsnzPKX9YNWIXTmKWICpQCBeiYEjyE/eifJKwoyGTFP4iob3ONXq1DD/9BiLq/5U8bzKUAAAACXJIX0Ul61GZ+J1MIqD9AFbgafKdtskaLXsaRUpPcmBG3Yb5/YIT8reBuBrRdpgNKHkW+5zrzV1D0XE7v92d3o</EncryptedPassword>
+    <History>False|2026-11-18T22:35:07.3190932Z||;False|2026-11-18T16:32:42.7505194-06:00||;False|2026-11-18T00:29:08.7618144-06:00||;False|2026-11-18T00:28:15.6785453-06:00||;</History>
+    <LastFailureDetails />
+    <_PublishTargetUrl>ftps://waws-prod-cy4-009.ftp.azurewebsites.windows.net/site/wwwroot</_PublishTargetUrl>
   </PropertyGroup>
 </Project>

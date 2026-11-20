@@ -5,56 +5,477 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Agregar Destino | TuriStar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=2.0">
+    <style>
+        @keyframes cornerGlowFloatTop {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+                opacity: 0.78;
+            }
+
+            50% {
+                transform: translate3d(-42px, 34px, 0) scale(1.18);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
+                opacity: 0.78;
+            }
+        }
+
+        @keyframes cornerGlowFloatBottom {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+                opacity: 0.72;
+            }
+
+            50% {
+                transform: translate3d(46px, -32px, 0) scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate3d(0, 0, 0) scale(1);
+                opacity: 0.72;
+            }
+        }
+
+        .nd-wide-surface {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(155deg, rgba(22, 36, 61, 0.95) 0%, rgba(11, 19, 32, 0.98) 100%) !important;
+            border: 1.5px solid rgba(74, 222, 128, 0.34) !important;
+            border-radius: 26px !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 18px 46px rgba(0, 0, 0, 0.6), 0 0 36px rgba(74, 222, 128, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+            height: 100%;
+            transition: border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+            .nd-wide-surface > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .nd-wide-surface:hover {
+                border-color: rgba(74, 222, 128, 0.55) !important;
+                box-shadow: 0 22px 54px rgba(0, 0, 0, 0.7), 0 0 34px rgba(74, 222, 128, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            }
+
+            .nd-wide-surface::before {
+                content: "";
+                position: absolute;
+                top: -100px;
+                right: -100px;
+                width: 260px;
+                height: 260px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(74, 222, 128, 0.22) 0%, rgba(74, 222, 128, 0) 70%);
+                pointer-events: none;
+                z-index: 0;
+                will-change: transform, opacity;
+                animation: cornerGlowFloatTop 7.5s ease-in-out infinite;
+            }
+
+            .nd-wide-surface::after {
+                content: "";
+                position: absolute;
+                bottom: -115px;
+                left: -105px;
+                width: 260px;
+                height: 260px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, rgba(56, 189, 248, 0) 70%);
+                pointer-events: none;
+                z-index: 0;
+                will-change: transform, opacity;
+                animation: cornerGlowFloatBottom 9s ease-in-out infinite;
+            }
+
+        .nd-amber-glow::after {
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.18) 0%, rgba(250, 204, 21, 0) 70%);
+            animation: cornerGlowFloatBottom 8.2s ease-in-out infinite;
+        }
+
+        .nd-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.32rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(74, 222, 128, 0.12);
+            border: 1px solid rgba(74, 222, 128, 0.38);
+            color: #4ade80;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            box-shadow: 0 0 16px rgba(74, 222, 128, 0.14);
+        }
+
+        .nd-label {
+            color: #cbd5e1;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+            .nd-label i {
+                color: #facc15;
+                font-size: 0.92rem;
+            }
+
+        .nd-wide-surface .form-control,
+        .nd-wide-surface .form-select {
+            background-color: rgba(17, 28, 46, 0.92) !important;
+            border: 1px solid rgba(148, 163, 184, 0.24) !important;
+            color: #f8fafc !important;
+            border-radius: 14px !important;
+            transition: all 0.25s ease;
+        }
+
+            .nd-wide-surface .form-control::placeholder {
+                color: #64748b !important;
+            }
+
+            .nd-wide-surface .form-control:focus,
+            .nd-wide-surface .form-select:focus {
+                background-color: rgba(21, 35, 58, 0.98) !important;
+                border-color: #facc15 !important;
+                box-shadow: 0 0 0 0.22rem rgba(250, 204, 21, 0.2), 0 0 16px rgba(250, 204, 21, 0.14) !important;
+                color: #ffffff !important;
+            }
+
+            .nd-wide-surface .form-control[type="file"]::file-selector-button {
+                background: rgba(250, 204, 21, 0.15);
+                color: #facc15;
+                border: 1px solid rgba(250, 204, 21, 0.45);
+                border-radius: 10px;
+                padding: 0.4rem 0.85rem;
+                margin-right: 0.85rem;
+                font-weight: 600;
+                font-size: 0.82rem;
+                cursor: pointer;
+                transition: all 0.22s ease;
+            }
+
+            .nd-wide-surface .form-control[type="file"]:hover::file-selector-button {
+                background: rgba(250, 204, 21, 0.3);
+                border-color: #fde047;
+                color: #ffffff;
+            }
+
+        .nd-photo-stage {
+            border-radius: 20px;
+            border: 1.5px dashed rgba(250, 204, 21, 0.35);
+            background: rgba(10, 17, 30, 0.72);
+            padding: 1.15rem;
+            transition: border-color 0.25s ease;
+        }
+
+            .nd-photo-stage:hover {
+                border-color: rgba(250, 204, 21, 0.65);
+            }
+
+        .nd-preview-box {
+            display: none;
+            margin-top: 0.85rem;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1.5px solid rgba(74, 222, 128, 0.42);
+            background: rgba(10, 17, 30, 0.9);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.5);
+        }
+
+            .nd-preview-box.active {
+                display: block;
+            }
+
+            .nd-preview-box img {
+                width: 100%;
+                height: 235px;
+                object-fit: cover;
+                display: block;
+            }
+
+        .nd-preview-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 0.9rem;
+            background: rgba(15, 25, 42, 0.96);
+            font-size: 0.78rem;
+            color: #94a3b8;
+        }
+
+        .nd-tip-card {
+            background: rgba(12, 21, 36, 0.74);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 18px;
+            padding: 0.95rem 1.1rem;
+        }
+
+        .nd-schedule-box {
+            background: rgba(11, 19, 32, 0.72);
+            border: 1px solid rgba(74, 222, 128, 0.24);
+            border-radius: 18px;
+            padding: 1.05rem;
+        }
+
+        .nd-day-chip {
+            display: block;
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .nd-schedule-box .form-control-sm {
+            border-radius: 10px !important;
+            font-size: 0.78rem !important;
+            padding: 0.38rem 0.45rem !important;
+        }
+
+        /* Botón Amarillo de Cristal con animación de reflejo lenta y suave */
+        .btn-crystal-ios-amber,
+        .btn-crystal-ios-neutral {
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px) saturate(185%);
+            -webkit-backdrop-filter: blur(16px) saturate(185%);
+            font-weight: 700;
+            border-radius: 50rem;
+            transition: all 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+            .btn-crystal-ios-amber::before,
+            .btn-crystal-ios-neutral::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -135%;
+                width: 90%;
+                height: 100%;
+                background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.08) 35%, rgba(255, 255, 255, 0.52) 50%, rgba(255, 255, 255, 0.08) 65%, transparent 100%);
+                transform: skewX(-18deg);
+                transition: left 1.45s cubic-bezier(0.22, 1, 0.36, 1);
+                pointer-events: none;
+            }
+
+            .btn-crystal-ios-amber:hover::before,
+            .btn-crystal-ios-neutral:hover::before {
+                left: 145%;
+            }
+
+        .btn-crystal-ios-amber {
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.35) 0%, rgba(245, 158, 11, 0.24) 60%, rgba(253, 224, 71, 0.2) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.56);
+            border-left: 1px solid rgba(250, 204, 21, 0.48);
+            border-right: 1px solid rgba(250, 204, 21, 0.48);
+            border-bottom: 1px solid rgba(250, 204, 21, 0.85);
+            color: #fef9c3 !important;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 26px rgba(250, 204, 21, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.42);
+            transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+            .btn-crystal-ios-amber::before {
+                transition: left 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+            }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100" style="background-color: #fdfaf6;">
+<body class="d-flex flex-column min-vh-100">
     <div id="navbar-placeholder"></div>
 
-    <main class="container py-5 flex-grow-1 d-flex justify-content-center">
-        <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 w-100" style="max-width: 600px;">
-            <h1 class="h3 fw-bold mb-2">Agregar un nuevo lugar</h1>
-            <p class="text-muted mb-4">¿Conoces un lugar increíble en Hidalgo que no está en la lista? ¡Agrégalo para poder reseñarlo!</p>
+    <main class="container-fluid px-3 px-md-4 px-xl-5 py-5 flex-grow-1">
+        <!-- Encabezado superior a todo lo ancho -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <span class="nd-badge-pill mb-2">
+                    <i class="bi bi-compass-fill"></i> Exploración Hidalgo
+                </span>
+                <h1 class="h2 fw-bold mb-1 text-white">Agregar un nuevo lugar</h1>
+                <p class="text-muted small mb-0">
+                    ¿Conoces un rincón increíble en Hidalgo que aún no aparece? Súmalo a la comunidad y comparte su experiencia.
+                </p>
+            </div>
+            <a href="explorar.html" class="btn btn-crystal-ios-neutral px-4 py-2 text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i> Ver Destinos
+            </a>
+        </div>
 
-            <form id="formNuevoDestino">
-                <div class="mb-3">
-                    <label class="form-label fw-medium small mb-1">Nombre del lugar</label>
-                    <input type="text" id="ndNombre" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-medium small mb-1">Municipio (Ej. Huasca, Omitlán...)</label>
-                    <input type="text" id="ndMunicipio" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-medium small mb-1">Fotografía del lugar (Archivo local)</label>
-                    <input type="file" id="ndUrlFoto" accept="image/*" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label fw-medium small mb-1">Breve descripción</label>
-                    <textarea id="ndDescripcion" class="form-control p-2" style="background-color: #f0f2f5; border: 1px solid #ced4da;" rows="3" required></textarea>
-                </div>
+        <form id="formNuevoDestino">
+            <div class="row g-4 align-items-stretch">
+                <!-- Columna Izquierda: Fotografía, vista previa y guía visual -->
+                <div class="col-lg-5">
+                    <div class="card nd-wide-surface nd-amber-glow border-0 p-4 p-md-5 d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="text-turistar-green fw-bold text-uppercase d-block mb-2" style="letter-spacing: 1.6px; font-size: 0.72rem;">
+                                Portada del Destino
+                            </span>
+                            <h2 class="h5 fw-bold text-white mb-3">Fotografía del lugar</h2>
 
-                <div id="alertaDestino" class="alert d-none small py-2 text-center"></div>
-                <div class="mb-4">
-                    <label class="form-label fw-medium small mb-2">Horarios de apertura (Ej. 09:00 - 18:00 o Cerrado)</label>
-                    <div class="row g-2 small">
-                        <div class="col-4 col-md-3"><input type="text" id="hLu" class="form-control form-control-sm text-center" placeholder="Lunes" value="09:00 - 18:00"></div>
-                        <div class="col-4 col-md-3"><input type="text" id="hMa" class="form-control form-control-sm text-center" placeholder="Martes" value="09:00 - 18:00"></div>
-                        <div class="col-4 col-md-3"><input type="text" id="hMi" class="form-control form-control-sm text-center" placeholder="Miércoles" value="09:00 - 18:00"></div>
-                        <div class="col-4 col-md-3"><input type="text" id="hJu" class="form-control form-control-sm text-center" placeholder="Jueves" value="09:00 - 18:00"></div>
-                        <div class="col-4 col-md-3"><input type="text" id="hVi" class="form-control form-control-sm text-center" placeholder="Viernes" value="09:00 - 18:00"></div>
-                        <div class="col-4 col-md-3"><input type="text" id="hSa" class="form-control form-control-sm text-center" placeholder="Sábado" value="09:00 - 18:00"></div>
-                        <div class="col-4 col-md-3"><input type="text" id="hDo" class="form-control form-control-sm text-center" placeholder="Domingo" value="09:00 - 18:00"></div>
+                            <div class="nd-photo-stage mb-4">
+                                <label for="ndUrlFoto" class="nd-label mb-2">
+                                    <i class="bi bi-image-fill"></i> Selecciona un archivo local
+                                </label>
+                                <input type="file" id="ndUrlFoto" accept="image/*" class="form-control px-3 py-2" required>
+
+                                <div id="ndPreviewBox" class="nd-preview-box">
+                                    <img id="ndPreviewImg" src="" alt="Vista previa del destino">
+                                    <div class="nd-preview-footer">
+                                        <span id="ndPreviewName" class="text-truncate me-2">Vista previa</span>
+                                        <span class="text-turistar-green fw-semibold">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Lista
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <div class="nd-tip-card d-flex align-items-center gap-3">
+                                <i class="bi bi-camera2 fs-4 text-warning"></i>
+                                <div>
+                                    <div class="small fw-bold text-white">Buena iluminación y encuadre</div>
+                                    <div class="small text-muted" style="font-size: 0.78rem;">Una foto clara ayuda a que otros viajeros reconozcan el sitio al instante.</div>
+                                </div>
+                            </div>
+                            <div class="nd-tip-card d-flex align-items-center gap-3">
+                                <i class="bi bi-chat-square-quote fs-4 text-turistar-green"></i>
+                                <div>
+                                    <div class="small fw-bold text-white">Publicación y primera reseña</div>
+                                    <div class="small text-muted" style="font-size: 0.78rem;">Al guardar podrás continuar para dejar tu reseña inicial del destino.</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <button type="submit" id="btnGuardarDestino" class="btn bg-turistar-green text-white w-100 fw-bold py-2 rounded-pill">
-                    Guardar y Crear Reseña
-                </button>
-            </form>
-        </div>
+
+                <!-- Columna Derecha: Datos generales, descripción y horarios -->
+                <div class="col-lg-7">
+                    <div class="card nd-wide-surface border-0 p-4 p-md-5 d-flex flex-column justify-content-between">
+                        <div>
+                            <span class="text-turistar-green fw-bold text-uppercase d-block mb-1" style="letter-spacing: 1.6px; font-size: 0.72rem;">
+                                Información del Lugar
+                            </span>
+                            <h2 class="h4 fw-bold text-white mb-4">Detalles y horarios</h2>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="ndNombre" class="nd-label">
+                                        <i class="bi bi-geo-alt-fill"></i> Nombre del lugar
+                                    </label>
+                                    <input type="text" id="ndNombre" class="form-control px-3 py-2.5" placeholder="Ej. Prismas Basálticos" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="ndMunicipio" class="nd-label">
+                                        <i class="bi bi-pin-map-fill"></i> Municipio
+                                    </label>
+                                    <input type="text" id="ndMunicipio" class="form-control px-3 py-2.5" placeholder="Ej. Huasca, Omitlán..." required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ndDescripcion" class="nd-label">
+                                    <i class="bi bi-card-text"></i> Breve descripción
+                                </label>
+                                <textarea id="ndDescripcion" class="form-control px-3 py-2.5" rows="3" placeholder="Cuéntanos qué hace especial este lugar, cómo es el ambiente o qué recomiendan llevar..." required></textarea>
+                            </div>
+
+                            <div id="alertaDestino" class="alert d-none small py-2 text-center rounded-3 mb-3"></div>
+
+                            <div class="mb-4">
+                                <label class="nd-label mb-2">
+                                    <i class="bi bi-clock-history"></i> Horarios de apertura (Ej. 09:00 - 18:00 o Cerrado)
+                                </label>
+                                <div class="nd-schedule-box">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Lunes</span>
+                                            <input type="text" id="hLu" class="form-control form-control-sm text-center" placeholder="Lunes" value="09:00 - 18:00">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Martes</span>
+                                            <input type="text" id="hMa" class="form-control form-control-sm text-center" placeholder="Martes" value="09:00 - 18:00">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Miércoles</span>
+                                            <input type="text" id="hMi" class="form-control form-control-sm text-center" placeholder="Miércoles" value="09:00 - 18:00">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Jueves</span>
+                                            <input type="text" id="hJu" class="form-control form-control-sm text-center" placeholder="Jueves" value="09:00 - 18:00">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Viernes</span>
+                                            <input type="text" id="hVi" class="form-control form-control-sm text-center" placeholder="Viernes" value="09:00 - 18:00">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Sábado</span>
+                                            <input type="text" id="hSa" class="form-control form-control-sm text-center" placeholder="Sábado" value="09:00 - 18:00">
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-md-3">
+                                            <span class="nd-day-chip">Domingo</span>
+                                            <input type="text" id="hDo" class="form-control form-control-sm text-center" placeholder="Domingo" value="09:00 - 18:00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btnGuardarDestino" class="btn btn-crystal-ios-amber w-100 fw-bold py-3">
+                            <i class="bi bi-plus-circle-fill me-1"></i> Guardar y Crear Reseña
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
     </main>
 
-    <script src="js/config.js"></script>
-    <script src="js/components.js"></script>
-    <script src="js/nuevo_destino.js"></script>
+    <div id="footer-placeholder"></div>
+
+    <script src="js/config.js?v=1.0"></script>
+    <script src="js/components.js?v=3.0"></script>
+    <script src="js/nuevo_destino.js?v=3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const inputFoto = document.getElementById("ndUrlFoto");
+            const previewBox = document.getElementById("ndPreviewBox");
+            const previewImg = document.getElementById("ndPreviewImg");
+            const previewName = document.getElementById("ndPreviewName");
+
+            if (!inputFoto || !previewBox || !previewImg) return;
+
+            inputFoto.addEventListener("change", () => {
+                const file = inputFoto.files && inputFoto.files[0];
+                if (!file) {
+                    previewBox.classList.remove("active");
+                    previewImg.removeAttribute("src");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target?.result || "";
+                    if (previewName) previewName.textContent = file.name;
+                    previewBox.classList.add("active");
+                };
+                reader.readAsDataURL(file);
+            });
+        })();
+    </script>
 </body>
 </html>

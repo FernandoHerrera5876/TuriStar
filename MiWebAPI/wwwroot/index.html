@@ -6,74 +6,135 @@
     <title>TuriStar | Descubre la magia de Hidalgo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <style>
         .hero-home {
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80') center/cover;
-            height: 60vh;
+            position: relative;
+            z-index: 1;
+            height: 75vh !important;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://images.pexels.com/photos/12564583/pexels-photo-12564583.jpeg') center/cover no-repeat fixed;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             text-align: center;
+            overflow: hidden;
         }
 
-        .feature-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #f2e9d8;
-        }
+            .hero-home > .container {
+                position: relative;
+                z-index: 2;
+            }
 
         .feature-icon {
-            font-size: 2rem;
-            color: #528233;
+            font-size: 2.2rem;
             margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
+    <!-- Navbar inyectado dinámicamente -->
     <div id="navbar-placeholder"></div>
 
     <header class="hero-home">
-        <div>
+        <div class="container">
             <i class="bi bi-star fs-1 text-warning mb-2"></i>
             <h1 class="display-3 fw-bold mb-3">TuriStar</h1>
             <p class="fs-4 mb-4">Descubre la magia de Hidalgo</p>
-            <a href="explorar.html" class="btn bg-turistar-green text-white btn-lg px-5 rounded-pill">Comenzar a Explorar</a>
+            <a href="explorar.html" class="btn btn-glass-ios btn-lg">Comenzar a Explorar</a>
         </div>
     </header>
 
-    <main class="container py-5">
-        <h2 class="text-center fw-bold mb-5">¿Por qué viajar con TuriStar?</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-card h-100">
-                    <i class="bi bi-compass feature-icon"></i>
-                    <h3 class="h5 fw-bold">Lugares Únicos</h3>
-                    <p class="text-muted small">Explora desde prismas geológicos hasta grutas de aguas termales color turquesa.</p>
+    <main class="container-fluid py-5 overflow-hidden">
+        <div class="text-center mb-5">
+            <span class="text-turistar-green fw-bold text-uppercase" style="letter-spacing: 2px; font-size: 0.85rem;">Experiencia TuriStar</span>
+            <h2 class="fw-bold display-6 mt-1">¿Por qué viajar con TuriStar?</h2>
+        </div>
+
+        <!-- Carrusel Infinito -->
+        <div class="marquee-container py-3">
+            <div class="marquee-track">
+                <!-- Grupo 1 -->
+                <div class="marquee-item">
+                    <div class="feature-card p-4 text-center">
+                        <div class="feature-icon mb-2"><i class="bi bi-compass fs-1"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Lugares Únicos</h3>
+                        <p class="text-muted small mb-0">Explora desde prismas geológicos hasta grutas de aguas termales color turquesa.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card h-100">
-                    <i class="bi bi-star feature-icon"></i>
-                    <h3 class="h5 fw-bold">Reseñas Reales</h3>
-                    <p class="text-muted small">Comunidad honesta compartiendo sus mejores consejos y experiencias.</p>
+
+                <div class="marquee-item">
+                    <div class="feature-card p-4 text-center">
+                        <div class="feature-icon mb-2"><i class="bi bi-star fs-1"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Reseñas Reales</h3>
+                        <p class="text-muted small mb-0">Comunidad honesta compartiendo sus mejores consejos y experiencias de viaje.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card h-100">
-                    <i class="bi bi-map feature-icon"></i>
-                    <h3 class="h5 fw-bold">Rutas Personalizadas</h3>
-                    <p class="text-muted small">Planifica paso a paso tu aventura por los Pueblos Mágicos hidalguenses.</p>
+
+                <div class="marquee-item">
+                    <div class="feature-card p-4 text-center">
+                        <div class="feature-icon mb-2"><i class="bi bi-map fs-1"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Rutas Personalizadas</h3>
+                        <p class="text-muted small mb-0">Planifica paso a paso tu aventura por los Pueblos Mágicos hidalguenses.</p>
+                    </div>
+                </div>
+
+                <!-- Grupo 2 (Duplicado para bucle fluido) -->
+                <div class="marquee-item">
+                    <div class="feature-card p-4 text-center">
+                        <div class="feature-icon mb-2"><i class="bi bi-compass fs-1"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Lugares Únicos</h3>
+                        <p class="text-muted small mb-0">Explora desde prismas geológicos hasta grutas de aguas termales color turquesa.</p>
+                    </div>
+                </div>
+
+                <div class="marquee-item">
+                    <div class="feature-card p-4 text-center">
+                        <div class="feature-icon mb-2"><i class="bi bi-star fs-1"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Reseñas Reales</h3>
+                        <p class="text-muted small mb-0">Comunidad honesta compartiendo sus mejores consejos y experiencias de viaje.</p>
+                    </div>
+                </div>
+
+                <div class="marquee-item">
+                    <div class="feature-card p-4 text-center">
+                        <div class="feature-icon mb-2"><i class="bi bi-map fs-1"></i></div>
+                        <h3 class="h5 fw-bold mb-2">Rutas Personalizadas</h3>
+                        <p class="text-muted small mb-0">Planifica paso a paso tu aventura por los Pueblos Mágicos hidalguenses.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
-
+    
     <script src="js/components.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Control optimizado del Navbar al hacer scroll
+        document.addEventListener("DOMContentLoaded", () => {
+            const navbar = document.querySelector('#mainNavbar') || document.querySelector('.navbar-turistar');
+            let ticking = false;
+
+            if (navbar) {
+                window.addEventListener('scroll', () => {
+                    if (!ticking) {
+                        window.requestAnimationFrame(() => {
+                            if (window.scrollY > 20) {
+                                navbar.classList.add('navbar-scrolled');
+                            } else {
+                                navbar.classList.remove('navbar-scrolled');
+                            }
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                }, { passive: true });
+            }
+        });
+    </script>
 </body>
 </html>
