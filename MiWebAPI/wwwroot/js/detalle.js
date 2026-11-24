@@ -35,53 +35,113 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// --- CARGAR DATOS PRINCIPALES DEL DESTINO ---
+function mostrarEstadoDetalle({ icono, titulo, mensaje, mostrarReintentar = false }) {
+    const spinner = document.getElementById('spinnerGeneral');
+    const contenido = document.getElementById('contenidoDestino');
+    if (contenido) contenido.classList.add('d-none');
+
+    if (spinner) {
+        spinner.classList.remove('d-none');
+        spinner.innerHTML = `
+            <div class="container py-5" style="max-width: 560px;">
+                <div class="card detalle-glass-card text-center p-4 p-md-5 rounded-4">
+                    <i class="bi ${icono} fs-1 text-warning mb-3"></i>
+                    <h2 class="h4 fw-bold text-white mb-2">${titulo}</h2>
+                    <p class="text-light opacity-75 small mb-4">${mensaje}</p>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        ${mostrarReintentar ? `
+                            <button type="button" class="btn btn-glass-ios px-4" onclick="window.location.reload()">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Reintentar
+                            </button>
+                        ` : ''}
+                        <a href="explorar.html" class="btn btn-outline-light rounded-pill px-4">
+                            <i class="bi bi-compass me-1"></i> Volver a Explorar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
 async function cargarInfoDestino() {
     try {
-        const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Destino/todos`);
-        const resultado = await respuesta.json();
+        const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Destino/${encodeURIComponent(idDestinoActual)}`);
 
-        if (respuesta.ok && resultado.isSuccess) {
-            const destino = resultado.objeto.find(d => d.idDestino == idDestinoActual);
-
-            if (destino) {
-                // Llenamos el HTML de la cabecera (usando || por si algún dato es null)
-                document.getElementById('detalleNombre').textContent = destino.nombre;
-                document.getElementById('detalleMunicipio').textContent = destino.municipio;
-                document.getElementById('detalleDescripcion').textContent = destino.descripcion;
-                const ulHorarios = document.getElementById('listaHorariosSemana');
-                if (ulHorarios) {
-                    ulHorarios.innerHTML = `
-                        <li class="mb-1"><strong class="text-dark">Lunes:</strong> ${destino.horarioLunes || 'Sin dato'}</li>
-                        <li class="mb-1"><strong class="text-dark">Martes:</strong> ${destino.horarioMartes || 'Sin dato'}</li>
-                        <li class="mb-1"><strong class="text-dark">Miércoles:</strong> ${destino.horarioMiercoles || 'Sin dato'}</li>
-                        <li class="mb-1"><strong class="text-dark">Jueves:</strong> ${destino.horarioJueves || 'Sin dato'}</li>
-                        <li class="mb-1"><strong class="text-dark">Viernes:</strong> ${destino.horarioViernes || 'Sin dato'}</li>
-                        <li class="mb-1"><strong class="text-dark">Sábado:</strong> ${destino.horarioSabado || 'Sin dato'}</li>
-                        <li class="mb-1"><strong class="text-dark">Domingo:</strong> ${destino.horarioDomingo || 'Sin dato'}</li>
-                    `;
-                }
-                document.getElementById('detallePrecioEntrada').textContent = destino.precioEntrada || "0";
-                document.getElementById('detallePrecioEst').textContent = destino.precioEstacionamiento || "0";
-                const lat = destino.latitud || 20.101061;
-                const lng = destino.longitud || -98.759131;
-                document.getElementById('btnComoLlegar').href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-
-                // Si la calificación promedio viene nula, ponemos 0.0
-                const promedio = destino.calificacionPromedio || 0;
-                document.getElementById('detallePromedio').textContent = promedio.toFixed(1);
-
-                document.getElementById('detalleImagenBg').style.backgroundImage = `url('${destino.urlFoto}')`;
-
-                // Ocultamos el spinner global y mostramos el cuerpo de la página
-                document.getElementById('spinnerGeneral').classList.add('d-none');
-                document.getElementById('contenidoDestino').classList.remove('d-none');
-            } else {
-                window.location.replace("explorar.html");
-            }
+        if (respuesta.status === 404) {
+            mostrarEstadoDetalle({
+                icono: 'bi-search',
+                titulo: 'Destino no encontrado',
+                mensaje: `El registro solicitado (ID ${idDestinoActual}) no existe o fue eliminado.`
+            });
+            return;
         }
+
+        if (!respuesta.ok) {
+            throw new Error(`HTTP ${respuesta.status}`);
+        }
+
+        const resultado = await respuesta.json();
+        const destino = resultado?.objeto;
+
+        if (!resultado.isSuccess || !destino) {
+            mostrarEstadoDetalle({
+                icono: 'bi-search',
+                titulo: 'Destino no encontrado',
+                mensaje: resultado?.respuesta || 'El destino que buscas no existe en el sistema.'
+            });
+            return;
+        }
+
+        // Llenar los datos en pantalla
+        document.getElementById('detalleNombre').textContent = destino.nombre || 'Sin nombre';
+        document.getElementById('detalleMunicipio').textContent = destino.municipio || 'Hidalgo';
+        document.getElementById('detalleDescripcion').textContent = destino.descripcion || 'Sin descripción.';
+
+        const ulHorarios = document.getElementById('listaHorariosSemana');
+        if (ulHorarios) {
+            ulHorarios.innerHTML = `
+                <li class="mb-1"><strong class="text-white">Lunes:</strong> ${destino.horarioLunes || 'Sin dato'}</li>
+                <li class="mb-1"><strong class="text-white">Martes:</strong> ${destino.horarioMartes || 'Sin dato'}</li>
+                <li class="mb-1"><strong class="text-white">Miércoles:</strong> ${destino.horarioMiercoles || 'Sin dato'}</li>
+                <li class="mb-1"><strong class="text-white">Jueves:</strong> ${destino.horarioJueves || 'Sin dato'}</li>
+                <li class="mb-1"><strong class="text-white">Viernes:</strong> ${destino.horarioViernes || 'Sin dato'}</li>
+                <li class="mb-1"><strong class="text-white">Sábado:</strong> ${destino.horarioSabado || 'Sin dato'}</li>
+                <li class="mb-1"><strong class="text-white">Domingo:</strong> ${destino.horarioDomingo || 'Sin dato'}</li>
+            `;
+        }
+
+        const elEntrada = document.getElementById('detallePrecioEntrada');
+        if (elEntrada) elEntrada.textContent = destino.precioEntrada ?? "0";
+        const elEst = document.getElementById('detallePrecioEst');
+        if (elEst) elEst.textContent = destino.precioEstacionamiento ?? "0";
+
+        const elComoLlegar = document.getElementById('detalleComoLlegar');
+        if (elComoLlegar && destino.comoLlegar) {
+            elComoLlegar.textContent = destino.comoLlegar;
+        }
+
+        const lat = destino.latitud || 20.101061;
+        const lng = destino.longitud || -98.759131;
+        const btnMapa = document.getElementById('btnComoLlegar');
+        if (btnMapa) {
+            btnMapa.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        }
+
+        const promedio = Number(destino.calificacionPromedio || 0);
+        document.getElementById('detallePromedio').textContent = promedio.toFixed(1);
+        document.getElementById('detalleImagenBg').style.backgroundImage = `url('${destino.urlFoto}')`;
+
+        document.getElementById('spinnerGeneral').classList.add('d-none');
+        document.getElementById('contenidoDestino').classList.remove('d-none');
     } catch (error) {
         console.error("Error al cargar datos del destino:", error);
+        mostrarEstadoDetalle({
+            icono: 'bi-wifi-off',
+            titulo: 'API no disponible',
+            mensaje: 'No se pudo conectar con el servidor para cargar este destino. Verifica tu conexión e intenta de nuevo.',
+            mostrarReintentar: true
+        });
     }
 }
 
@@ -99,7 +159,7 @@ async function cargarResenas() {
         if (respuesta.ok && resultado.isSuccess && resultado.objeto.length > 0) {
             generarHTMLResenas(resultado.objeto, contenedor);
         } else {
-            contenedor.innerHTML = `<div class="alert alert-light text-center border-0 text-muted small shadow-sm">Aún no hay reseñas para este lugar. ¡Sé el primero en opinar!</div>`;
+            contenedor.innerHTML = `<div class="card detalle-glass-card text-center p-4 text-muted small">Aún no hay reseñas para este lugar. ¡Sé el primero en opinar!</div>`;
         }
     } catch (error) {
         console.error("Error al cargar reseñas:", error);
@@ -112,30 +172,18 @@ function generarHTMLResenas(listaResenas, contenedor) {
         let estrellasHTML = "";
         for (let i = 1; i <= 5; i++) {
             estrellasHTML += i <= resena.calificacion
-                ? '<i class="bi bi-star-fill text-warning"></i> '
-                : '<i class="bi bi-star text-muted"></i> ';
+                ? '<i class="bi bi-star-fill text-warning" style="filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.45));"></i> '
+                : '<i class="bi bi-star text-secondary"></i> ';
         }
 
         const fecha = new Date(resena.fechaCreacion).toLocaleDateString();
+        const nombreUsuario = resena.nombreUsuario || "Viajero";
 
         const fotoHTML = resena.fotoUsuario
-            ? `<img src="${resena.fotoUsuario}" class="rounded-circle object-fit-cover shadow-sm" style="width: 50px; height: 50px;">`
-            : `<div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 1.2rem;">${resena.nombreUsuario.charAt(0).toUpperCase()}</div>`;
+            ? `<img src="${resena.fotoUsuario}" class="rounded-circle object-fit-cover shadow-sm" style="width: 50px; height: 50px; border: 1.5px solid #4ade80;">`
+            : `<div class="bg-turistar-green text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 50px; height: 50px; font-size: 1.2rem;">${nombreUsuario.charAt(0).toUpperCase()}</div>`;
 
-        // --- CÓDIGO NUEVO: Galería de fotos de la reseña ---
-        let galeriaHTML = "";
-        if (resena.fotos && resena.fotos.length > 0) {
-            galeriaHTML = '<div class="d-flex gap-2 mt-3 flex-wrap">';
-            resena.fotos.forEach(url => {
-                // Usamos la URL base del backend para que encuentre las imágenes sin importar el puerto
-                const urlBackend = CONFIG.API_URL_BASE.replace('/api/Auth', '').replace('/api/Resena', '').replace('/api', '');
-                galeriaHTML += `<img src="${urlBackend}${url}" 
-                                class="rounded-3 shadow-sm object-fit-cover" 
-                                style="width: 100px; height: 100px; border: 1px solid #eaeaea;">`;
-            });
-            galeriaHTML += '</div>';
-        }
-        // ---------------------------------------------------
+        const galeriaHTML = construirGaleriaResenaHTML(resena.fotos ?? resena.Fotos ?? resena.fotosResena);
 
         const html = `
             <div class="card shadow-sm border-0 rounded-4 mb-3">
@@ -143,18 +191,16 @@ function generarHTMLResenas(listaResenas, contenedor) {
                     <div class="d-flex align-items-start gap-3 mb-2">
                         ${fotoHTML}
                         <div>
-                            <h6 class="fw-bold mb-0">${resena.nombreUsuario}</h6>
+                            <h6 class="fw-bold mb-0 text-white">${nombreUsuario}</h6>
                             <small class="text-muted">${fecha}</small>
                         </div>
                     </div>
                     <div class="mb-2">
                         ${estrellasHTML}
                     </div>
-                    <p class="text-secondary mb-0">${resena.comentario}</p>
-                    
-                    <!-- Insertamos la galería justo aquí debajo del texto -->
+                    <p class="mb-0" style="color: #cbd5e1;">${resena.comentario}</p>
+
                     ${galeriaHTML}
-                    
                 </div>
             </div>
         `;
@@ -164,11 +210,16 @@ function generarHTMLResenas(listaResenas, contenedor) {
 
 
 // --- ENVIAR NUEVA RESEÑA ---
+let enviandoResena = false;
+
 function configurarFormularioResena() {
     const form = document.getElementById("formNuevaResena");
+    if (!form) return;
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
+        if (enviandoResena) return;
 
         const usuarioSesion = JSON.parse(localStorage.getItem('usuarioTuriStar'));
         if (!usuarioSesion) {
@@ -177,21 +228,20 @@ function configurarFormularioResena() {
             return;
         }
 
+        enviandoResena = true;
         const btn = document.getElementById("btnEnviarResena");
+        const htmlOriginal = btn.innerHTML;
         btn.disabled = true;
-        btn.textContent = "Publicando...";
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Publicando...';
 
-        // Cuidar el ID (dependiendo si se guardó como idUsuario o IdUsuario en JS)
         const idDelUsuario = usuarioSesion.idUsuario || usuarioSesion.IdUsuario;
 
-        // 1. Construimos el FormData (ya NO es un objeto JSON)
         const formData = new FormData();
         formData.append("idUsuario", idDelUsuario);
-        formData.append("idDestino", parseInt(idDestinoActual));
+        formData.append("idDestino", parseInt(idDestinoActual, 10));
         formData.append("calificacion", document.getElementById("inputCalificacion").value);
         formData.append("comentario", document.getElementById("inputComentario").value.trim());
 
-        // 2. Extraemos las fotos si el usuario seleccionó alguna
         const inputFotos = document.getElementById("inputFotosResena");
         if (inputFotos && inputFotos.files.length > 0) {
             for (let i = 0; i < inputFotos.files.length; i++) {
@@ -199,25 +249,29 @@ function configurarFormularioResena() {
             }
         }
 
+        let exito = false;
+
         try {
             const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Resena/registrar`, {
                 method: "POST",
-                // IMPORTANTE: Quitamos el "Content-Type". 
-                // El navegador pondrá automáticamente "multipart/form-data" al ver que es un FormData.
                 body: formData
             });
 
             const resultado = await respuesta.json();
 
             if (respuesta.ok && resultado.isSuccess) {
+                exito = true;
                 mostrarAlertaResena("¡Tu reseña ha sido publicada!", true);
                 form.reset();
 
-                setTimeout(() => {
+                setTimeout(async () => {
                     document.getElementById("alertaResena").classList.add("d-none");
-                    cargarResenas();
+                    await cargarResenas();
+                    await cargarInfoDestino();
+                    enviandoResena = false;
+                    btn.disabled = false;
+                    btn.innerHTML = htmlOriginal;
                 }, 1500);
-
             } else {
                 mostrarAlertaResena(resultado.respuesta || resultado.mensaje || "No se pudo publicar la reseña.", false);
             }
@@ -225,8 +279,11 @@ function configurarFormularioResena() {
             console.error("Error al enviar reseña:", error);
             mostrarAlertaResena("Error de conexión al servidor.", false);
         } finally {
-            btn.disabled = false;
-            btn.textContent = "Publicar Reseña";
+            if (!exito) {
+                enviandoResena = false;
+                btn.disabled = false;
+                btn.innerHTML = htmlOriginal;
+            }
         }
     });
 }
@@ -288,41 +345,53 @@ document.getElementById('btnGuardarFavorito').addEventListener('click', async ()
 
 function actualizarBotonFavorito(esFavorito) {
     const btn = document.getElementById('btnGuardarFavorito');
+    if (!btn) return;
+    btn.style.color = '';
     if (esFavorito) {
-        btn.innerHTML = `<i class="bi bi-bookmark-heart-fill"></i> Guardado`;
-        btn.classList.replace('btn-outline-success', 'btn-success');
-        btn.style.color = '#fff';
+        btn.innerHTML = `<i class="bi bi-bookmark-heart-fill me-1"></i> Guardado`;
+        btn.classList.remove('btn-ios-outline-green');
+        btn.classList.add('btn-ios-green');
     } else {
-        btn.innerHTML = `<i class="bi bi-bookmark-heart"></i> Guardar en favoritos`;
-        btn.classList.replace('btn-success', 'btn-outline-success');
-        btn.style.color = '#528233';
+        btn.innerHTML = `<i class="bi bi-bookmark-heart me-1"></i> Guardar en favoritos`;
+        btn.classList.remove('btn-ios-green');
+        btn.classList.add('btn-ios-outline-green');
     }
 }
 
+let borrandoDestino = false;
+
 document.getElementById('btnBorrarDestino')?.addEventListener('click', async function (e) {
     e.preventDefault();
+    if (borrandoDestino) return;
 
-    // Truco de doble confirmación integrado en el HTML
-    if (!this.classList.contains('confirming')) {
-        this.classList.add('confirming');
-        const textoOriginal = this.innerHTML;
-        this.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> ¿Seguro? Clic para borrar';
+    const confirmado = await confirmarEliminacionModal({
+        titulo: 'Eliminar destino',
+        mensaje: '¿Seguro que deseas eliminar este lugar? Si haces clic en Cancelar, el destino permanecerá intacto.',
+        textoConfirmar: 'Sí, eliminar lugar'
+    });
 
-        // Si no hace clic en 3 segundos, regresa a la normalidad
-        setTimeout(() => {
-            this.classList.remove('confirming');
-            this.innerHTML = textoOriginal;
-        }, 3000);
-        return;
-    }
+    // Cancelación de eliminación: no se llama a la API
+    if (!confirmado) return;
 
-    // Si llegó aquí, es porque dio el SEGUNDO clic
-    this.innerHTML = "Borrando...";
+    borrandoDestino = true;
+    const htmlOriginal = this.innerHTML;
+    this.classList.add('disabled');
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Borrando...';
+
     try {
         const req = await fetch(`${CONFIG.API_URL_BASE}/Destino/eliminar/${idDestinoActual}`, { method: 'DELETE' });
         const res = await req.json();
-        if (res.isSuccess) {
-            window.location.replace("explorar.html"); // Lo mandamos al inicio
+        if (req.ok && res.isSuccess) {
+            window.location.replace("explorar.html");
+            return;
         }
-    } catch (error) { console.error(error); }
+        mostrarAlertaResena?.(res.mensaje || "No se pudo eliminar el destino.", false);
+    } catch (error) {
+        console.error(error);
+        mostrarAlertaResena?.("Error de conexión con la API al intentar eliminar.", false);
+    }
+
+    borrandoDestino = false;
+    this.classList.remove('disabled');
+    this.innerHTML = htmlOriginal;
 });

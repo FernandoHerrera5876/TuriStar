@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=2.0">
+    <link rel="stylesheet" href="css/styles.css?v=6.0">
     <style>
         @keyframes cornerGlowFloatTop {
             0% {
@@ -248,7 +248,6 @@
             padding: 0.38rem 0.45rem !important;
         }
 
-        /* Botón Amarillo de Cristal con animación de reflejo lenta y suave */
         .btn-crystal-ios-amber,
         .btn-crystal-ios-neutral {
             position: relative;
@@ -287,11 +286,14 @@
             border-bottom: 1px solid rgba(250, 204, 21, 0.85);
             color: #fef9c3 !important;
             box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 26px rgba(250, 204, 21, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.42);
-            transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-            .btn-crystal-ios-amber::before {
-                transition: left 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+            .btn-crystal-ios-amber:hover:not(:disabled) {
+                background: linear-gradient(135deg, rgba(250, 204, 21, 0.5) 0%, rgba(245, 158, 11, 0.36) 60%, rgba(253, 224, 71, 0.3) 100%);
+                border-color: #fde047;
+                color: #ffffff !important;
+                transform: translateY(-2px);
+                box-shadow: 0 0 36px rgba(250, 204, 21, 0.5), 0 14px 32px rgba(0, 0, 0, 0.58), inset 0 1px 2px rgba(255, 255, 255, 0.55);
             }
     </style>
 </head>
@@ -299,7 +301,7 @@
     <div id="navbar-placeholder"></div>
 
     <main class="container-fluid px-3 px-md-4 px-xl-5 py-5 flex-grow-1">
-        <!-- Encabezado superior a todo lo ancho -->
+        <!-- Encabezado superior -->
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
                 <span class="nd-badge-pill mb-2">
@@ -307,7 +309,7 @@
                 </span>
                 <h1 class="h2 fw-bold mb-1 text-white">Agregar un nuevo lugar</h1>
                 <p class="text-muted small mb-0">
-                    ¿Conoces un rincón increíble en Hidalgo que aún no aparece? Súmalo a la comunidad y comparte su experiencia.
+                    ¿Conoces un rincón increíble en Hidalgo que aún no aparece? Súmalo a la comunidad con todos sus datos.
                 </p>
             </div>
             <a href="explorar.html" class="btn btn-crystal-ios-neutral px-4 py-2 text-decoration-none">
@@ -317,7 +319,7 @@
 
         <form id="formNuevoDestino">
             <div class="row g-4 align-items-stretch">
-                <!-- Columna Izquierda: Fotografía, vista previa y guía visual -->
+                <!-- Columna Izquierda: Fotografía, vista previa y coordenadas -->
                 <div class="col-lg-5">
                     <div class="card nd-wide-surface nd-amber-glow border-0 p-4 p-md-5 d-flex flex-column justify-content-between">
                         <div>
@@ -342,6 +344,26 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Coordenadas opcionales -->
+                            <div class="nd-schedule-box mb-4">
+                                <label class="nd-label mb-1">
+                                    <i class="bi bi-crosshair"></i> Coordenadas GPS (Opcional)
+                                </label>
+                                <p class="small text-muted mb-3" style="font-size: 0.76rem;">
+                                    Si los dejas vacíos, las calcularemos automáticamente con el nombre y municipio.
+                                </p>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <span class="nd-day-chip text-start">Latitud</span>
+                                        <input type="number" id="ndLatitud" step="0.000001" class="form-control form-control-sm" placeholder="Ej. 20.648600">
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="nd-day-chip text-start">Longitud</span>
+                                        <input type="number" id="ndLongitud" step="0.000001" class="form-control form-control-sm" placeholder="Ej. -98.995800">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -353,24 +375,24 @@
                                 </div>
                             </div>
                             <div class="nd-tip-card d-flex align-items-center gap-3">
-                                <i class="bi bi-chat-square-quote fs-4 text-turistar-green"></i>
+                                <i class="bi bi-cash-coin fs-4 text-turistar-green"></i>
                                 <div>
-                                    <div class="small fw-bold text-white">Publicación y primera reseña</div>
-                                    <div class="small text-muted" style="font-size: 0.78rem;">Al guardar podrás continuar para dejar tu reseña inicial del destino.</div>
+                                    <div class="small fw-bold text-white">Costos actualizados</div>
+                                    <div class="small text-muted" style="font-size: 0.78rem;">Si el acceso o estacionamiento es gratuito, deja el valor en 0.</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna Derecha: Datos generales, descripción y horarios -->
+                <!-- Columna Derecha: Datos generales, costos, cómo llegar y horarios -->
                 <div class="col-lg-7">
                     <div class="card nd-wide-surface border-0 p-4 p-md-5 d-flex flex-column justify-content-between">
                         <div>
                             <span class="text-turistar-green fw-bold text-uppercase d-block mb-1" style="letter-spacing: 1.6px; font-size: 0.72rem;">
                                 Información del Lugar
                             </span>
-                            <h2 class="h4 fw-bold text-white mb-4">Detalles y horarios</h2>
+                            <h2 class="h4 fw-bold text-white mb-4">Detalles, costos y horarios</h2>
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
@@ -383,8 +405,39 @@
                                     <label for="ndMunicipio" class="nd-label">
                                         <i class="bi bi-pin-map-fill"></i> Municipio
                                     </label>
-                                    <input type="text" id="ndMunicipio" class="form-control px-3 py-2.5" placeholder="Ej. Huasca, Omitlán..." required>
+                                    <input type="text" id="ndMunicipio" class="form-control px-3 py-2.5" placeholder="Ej. Huasca de Ocampo" required>
                                 </div>
+                            </div>
+
+                            <!-- Categoría y Costos -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="ndCategoria" class="nd-label">
+                                        <i class="bi bi-tags-fill"></i> Categoría
+                                    </label>
+                                    <select id="ndCategoria" class="form-select px-3 py-2.5" required>
+                                        <option value="" disabled selected>Cargando...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ndPrecioEntrada" class="nd-label">
+                                        <i class="bi bi-ticket-perforated-fill"></i> Entrada ($ MXN)
+                                    </label>
+                                    <input type="number" id="ndPrecioEntrada" class="form-control px-3 py-2.5" min="0" step="0.01" value="0" placeholder="0" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="ndPrecioEstacionamiento" class="nd-label">
+                                        <i class="bi bi-p-circle-fill"></i> Estacionamiento ($ MXN)
+                                    </label>
+                                    <input type="number" id="ndPrecioEstacionamiento" class="form-control px-3 py-2.5" min="0" step="0.01" value="0" placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="ndComoLlegar" class="nd-label">
+                                    <i class="bi bi-signpost-split-fill"></i> ¿Cómo llegar? (Indicaciones)
+                                </label>
+                                <input type="text" id="ndComoLlegar" class="form-control px-3 py-2.5" placeholder="Ej. Tomar carretera Pachuca–Huejutla hasta la desviación a Huasca..." required>
                             </div>
 
                             <div class="mb-3">
@@ -438,6 +491,9 @@
                         <button type="submit" id="btnGuardarDestino" class="btn btn-crystal-ios-amber w-100 fw-bold py-3">
                             <i class="bi bi-plus-circle-fill me-1"></i> Guardar y Crear Reseña
                         </button>
+                        <a id="btnCancelarDestino" href="explorar.html" class="btn btn-outline-light rounded-pill w-100 py-2 text-decoration-none">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar
+                        </a>
                     </div>
                 </div>
             </div>
@@ -447,35 +503,35 @@
     <div id="footer-placeholder"></div>
 
     <script src="js/config.js?v=1.0"></script>
-    <script src="js/components.js?v=3.0"></script>
-    <script src="js/nuevo_destino.js?v=3.0"></script>
+    <script src="js/components.js?v=5.0"></script>
+    <script src="js/nuevo_destino.js?v=4.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        (function () {
-            const inputFoto = document.getElementById("ndUrlFoto");
-            const previewBox = document.getElementById("ndPreviewBox");
-            const previewImg = document.getElementById("ndPreviewImg");
-            const previewName = document.getElementById("ndPreviewName");
+                (function () {
+                    const inputFoto = document.getElementById("ndUrlFoto");
+                    const previewBox = document.getElementById("ndPreviewBox");
+                    const previewImg = document.getElementById("ndPreviewImg");
+                    const previewName = document.getElementById("ndPreviewName");
 
-            if (!inputFoto || !previewBox || !previewImg) return;
+                    if (!inputFoto || !previewBox || !previewImg) return;
 
-            inputFoto.addEventListener("change", () => {
-                const file = inputFoto.files && inputFoto.files[0];
-                if (!file) {
-                    previewBox.classList.remove("active");
-                    previewImg.removeAttribute("src");
-                    return;
-                }
+                    inputFoto.addEventListener("change", () => {
+                        const file = inputFoto.files && inputFoto.files[0];
+                        if (!file) {
+                            previewBox.classList.remove("active");
+                            previewImg.removeAttribute("src");
+                            return;
+                        }
 
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    previewImg.src = ev.target?.result || "";
-                    if (previewName) previewName.textContent = file.name;
-                    previewBox.classList.add("active");
-                };
-                reader.readAsDataURL(file);
-            });
-        })();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            previewImg.src = ev.target?.result || "";
+                            if (previewName) previewName.textContent = file.name;
+                            previewBox.classList.add("active");
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                })();
     </script>
 </body>
 </html>

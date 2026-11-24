@@ -1,4 +1,9 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+﻿let todosLosDestinosMapa = [];
+let paginaActualMapa = 1;
+let destinoActivoIdMapa = null;
+const LUGARES_MAPA_POR_PAGINA = 6;
+
+document.addEventListener("DOMContentLoaded", () => {
     cargarDestinosEnMapa();
     configurarScrollBarraLateral();
 });
@@ -21,15 +26,18 @@ async function cargarDestinosEnMapa() {
     const contenedor = document.getElementById("listaLugaresMapa");
 
     try {
-        // Hacemos fetch a la misma ruta que usamos en explorar.js
         const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Destino/todos`);
         const resultado = await respuesta.json();
 
-        // Borramos el spinner
         contenedor.innerHTML = "";
 
         if (respuesta.ok && resultado.isSuccess && resultado.objeto.length > 0) {
-            generarListaLateral(resultado.objeto, contenedor);
+            todosLosDestinosMapa = resultado.objeto;
+            paginaActualMapa = 1;
+            destinoActivoIdMapa = todosLosDestinosMapa[0].idDestino;
+
+            actualizarVistaMapa();
+            actualizarMapa(todosLosDestinosMapa[0].latitud, todosLosDestinosMapa[0].longitud, null, todosLosDestinosMapa[0].idDestino);
         } else {
             contenedor.innerHTML = `<div class="alert alert-info small text-center">No hay lugares para mostrar en el mapa.</div>`;
         }
@@ -40,14 +48,39 @@ async function cargarDestinosEnMapa() {
     }
 }
 
-function generarListaLateral(listaDestinos, contenedor) {
-    listaDestinos.forEach((destino, index) => {
-        // El primer elemento lo marcamos como seleccionado por defecto
-        const isActive = index === 0 ? "active-location" : "";
+function actualizarVistaMapa() {
+    const contenedor = document.getElementById("listaLugaresMapa");
+    if (!contenedor) return;
 
-        // Tarjeta miniatura que llama a "actualizarMapa" al darle clic
+    const totalPaginas = Math.max(1, Math.ceil(todosLosDestinosMapa.length / LUGARES_MAPA_POR_PAGINA));
+    if (paginaActualMapa > totalPaginas) paginaActualMapa = totalPaginas;
+
+    const inicio = (paginaActualMapa - 1) * LUGARES_MAPA_POR_PAGINA;
+    const paginaItems = todosLosDestinosMapa.slice(inicio, inicio + LUGARES_MAPA_POR_PAGINA);
+
+    contenedor.innerHTML = "";
+    generarListaLateral(paginaItems, contenedor);
+    contenedor.scrollTop = 0;
+
+    renderizarPaginacion({
+        contenedorId: "paginacionMapa",
+        totalItems: todosLosDestinosMapa.length,
+        porPagina: LUGARES_MAPA_POR_PAGINA,
+        paginaActual: paginaActualMapa,
+        compacto: true,
+        onCambioPagina: (nuevaPagina) => {
+            paginaActualMapa = nuevaPagina;
+            actualizarVistaMapa();
+        }
+    });
+}
+
+function generarListaLateral(listaDestinos, contenedor) {
+    listaDestinos.forEach(destino => {
+        const isActive = destino.idDestino === destinoActivoIdMapa ? "active-location" : "";
+
         const html = `
-            <div class="card mb-3 rounded-4 location-item ${isActive}" onclick="actualizarMapa(${destino.latitud}, ${destino.longitud}, this)">
+            <div class="card mb-3 rounded-4 location-item ${isActive}" onclick="actualizarMapa(${destino.latitud}, ${destino.longitud}, this, ${destino.idDestino})">
                 <div class="card-body p-3 d-flex gap-3 align-items-center overflow-hidden">
                     <img src="${destino.urlFoto}" alt="${destino.nombre}" class="rounded-3 shadow-sm flex-shrink-0" style="width: 60px; height: 60px; object-fit: cover;">
                     <div class="flex-grow-1" style="min-width: 0; overflow: hidden;">
@@ -74,36 +107,21 @@ function generarListaLateral(listaDestinos, contenedor) {
             }
         }
     });
-
-    // Añadimos el botón del catálogo al final con el estilo de cristal iOS garantizado
-    const btnCatalogo = `
-        <a href="explorar.html" class="btn w-100 mt-3" style="background: rgba(74, 222, 128, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(74, 222, 128, 0.55); color: #ffffff; border-radius: 999px; padding: 0.65rem 1.4rem; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.35);">
-            <i class="bi bi-grid-3x3-gap-fill me-2"></i>Ver catálogo completo
-        </a>
-    `;
-    contenedor.insertAdjacentHTML('beforeend', btnCatalogo);
-
-    // Inicializar el mapa con las coordenadas del primer destino de la lista
-    if (listaDestinos.length > 0) {
-        actualizarMapa(listaDestinos[0].latitud, listaDestinos[0].longitud, null);
-    }
 }
 
-function actualizarMapa(lat, lon, elementoHtml) {
+function actualizarMapa(lat, lon, elementoHtml, idDestino = null) {
     const iframe = document.getElementById("iframeMapa");
-
-    // Inyectamos las coordenadas en una URL embedida de Google Maps
     iframe.src = `https://www.google.com/maps?q=${lat},${lon}&hl=es&z=15&output=embed`;
 
-    // Si se hizo clic en una tarjeta, le agregamos el estado activo y se lo quitamos a las demás
+    if (idDestino !== null) {
+        destinoActivoIdMapa = idDestino;
+    }
+
     if (elementoHtml) {
         const items = document.querySelectorAll('.location-item');
-        items.forEach(item => {
-            item.classList.remove('active-location');
-        });
+        items.forEach(item => item.classList.remove('active-location'));
         elementoHtml.classList.add('active-location');
 
-        // En celular (< 768px), sube suavemente hasta el mapa al tocar un lugar
         if (window.innerWidth < 768) {
             const contenedorMapa = document.getElementById("contenedorMapaPrincipal");
             if (contenedorMapa) {

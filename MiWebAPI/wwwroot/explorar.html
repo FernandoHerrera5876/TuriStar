@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=6.0">
     <style>
         .search-hero {
             position: relative;
@@ -215,43 +215,44 @@
         <div id="contenedorDestinos" class="row row-cols-1 row-cols-md-3 g-4 mb-5">
             <!-- El contenido dinámico aparecerá aquí -->
         </div>
+        <nav id="paginacionDestinos" class="turistar-pagination mb-5" aria-label="Paginación de destinos"></nav>
     </main>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const heroCarouselEl = document.getElementById("heroCarousel");
-            const indicators = document.querySelectorAll(".hero-indicators button");
+                document.addEventListener("DOMContentLoaded", () => {
+                    const heroCarouselEl = document.getElementById("heroCarousel");
+                    const indicators = document.querySelectorAll(".hero-indicators button");
 
-            if (!heroCarouselEl || indicators.length === 0) return;
+                    if (!heroCarouselEl || indicators.length === 0) return;
 
-            const actualizarIndicador = (index) => {
-                indicators.forEach((btn, i) => {
-                    btn.classList.toggle("active", i === index);
+                    const actualizarIndicador = (index) => {
+                        indicators.forEach((btn, i) => {
+                            btn.classList.toggle("active", i === index);
+                        });
+                    };
+
+                    // Sincroniza al iniciar el cambio y al terminar la transición
+                    heroCarouselEl.addEventListener("slide.bs.carousel", (event) => {
+                        actualizarIndicador(event.to);
+                    });
+
+                    heroCarouselEl.addEventListener("slid.bs.carousel", (event) => {
+                        actualizarIndicador(event.to);
+                    });
+
+                    // Permite hacer clic directo en las barritas para saltar a esa foto
+                    indicators.forEach((btn, i) => {
+                        btn.addEventListener("click", (e) => {
+                            e.preventDefault();
+                            const instancia = bootstrap.Carousel.getOrCreateInstance(heroCarouselEl);
+                            instancia.to(i);
+                            actualizarIndicador(i);
+                        });
+                    });
                 });
-            };
-
-            // Sincroniza al iniciar el cambio y al terminar la transición
-            heroCarouselEl.addEventListener("slide.bs.carousel", (event) => {
-                actualizarIndicador(event.to);
-            });
-
-            heroCarouselEl.addEventListener("slid.bs.carousel", (event) => {
-                actualizarIndicador(event.to);
-            });
-
-            // Permite hacer clic directo en las barritas para saltar a esa foto
-            indicators.forEach((btn, i) => {
-                btn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    const instancia = bootstrap.Carousel.getOrCreateInstance(heroCarouselEl);
-                    instancia.to(i);
-                    actualizarIndicador(i);
-                });
-            });
-        });
     </script>
     <script src="js/config.js?v=1.0"></script>
-    <script src="js/components.js?v=1.0"></script>
-    <script src="js/explorar.js?v=2.0"></script>
+    <script src="js/components.js?v=6.0"></script>
+    <script src="js/explorar.js?v=4.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

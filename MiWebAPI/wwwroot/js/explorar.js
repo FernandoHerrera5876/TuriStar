@@ -1,5 +1,7 @@
 ﻿// js/explorar.js
 let todosLosDestinos = [];
+let paginaActualExplorar = 1;
+const DESTINOS_POR_PAGINA = 6;
 
 document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("inputBuscarDestino");
@@ -9,7 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (input && q) input.value = q;
 
     if (input) {
-        input.addEventListener("input", () => pintarDestinos(filtrarDestinos(input.value)));
+        input.addEventListener("input", () => {
+            paginaActualExplorar = 1;
+            actualizarVistaDestinos();
+        });
     }
 
     cargarDestinos();
@@ -17,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function cargarDestinos() {
     const spinner = document.getElementById("spinnerCarga");
-    const input = document.getElementById("inputBuscarDestino");
 
     try {
         const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Destino/todos`);
@@ -25,7 +29,8 @@ async function cargarDestinos() {
 
         if (respuesta.ok && resultado.isSuccess) {
             todosLosDestinos = resultado.objeto || [];
-            pintarDestinos(filtrarDestinos(input ? input.value : ""));
+            paginaActualExplorar = 1;
+            actualizarVistaDestinos();
         } else {
             mostrarMensaje(resultado.respuesta || resultado.mensaje || "No se pudieron cargar los destinos.", "danger");
         }
@@ -33,7 +38,6 @@ async function cargarDestinos() {
         console.error("Error al cargar destinos:", error);
         mostrarMensaje("Ocurrió un error de conexión con el servidor.", "danger");
     } finally {
-        // Siempre quitamos el spinner, haya éxito o error
         if (spinner) spinner.classList.add("d-none");
     }
 }
@@ -45,6 +49,48 @@ function filtrarDestinos(texto) {
         (d.nombre || "").toLowerCase().includes(t) ||
         (d.municipio || "").toLowerCase().includes(t)
     );
+}
+
+function actualizarVistaDestinos() {
+    const input = document.getElementById("inputBuscarDestino");
+    const filtrados = filtrarDestinos(input ? input.value : "");
+
+    const totalPaginas = Math.max(1, Math.ceil(filtrados.length / DESTINOS_POR_PAGINA));
+    if (paginaActualExplorar > totalPaginas) paginaActualExplorar = totalPaginas;
+
+    const inicio = (paginaActualExplorar - 1) * DESTINOS_POR_PAGINA;
+    const paginaItems = filtrados.slice(inicio, inicio + DESTINOS_POR_PAGINA);
+
+    pintarDestinos(paginaItems);
+
+    // Respaldo: si no existe el contenedor en explorar.html, lo crea automáticamente
+    let navPag = document.getElementById("paginacionDestinos");
+    if (!navPag) {
+        const contDestinos = document.getElementById("contenedorDestinos");
+        if (contDestinos) {
+            navPag = document.createElement("nav");
+            navPag.id = "paginacionDestinos";
+            navPag.className = "turistar-pagination mb-5";
+            navPag.setAttribute("aria-label", "Paginación de destinos");
+            contDestinos.insertAdjacentElement("afterend", navPag);
+        }
+    }
+
+    if (typeof renderizarPaginacion === "function") {
+        renderizarPaginacion({
+            contenedorId: "paginacionDestinos",
+            totalItems: filtrados.length,
+            porPagina: DESTINOS_POR_PAGINA,
+            paginaActual: paginaActualExplorar,
+            scrollTargetId: "contenedorDestinos",
+            onCambioPagina: (nuevaPagina) => {
+                paginaActualExplorar = nuevaPagina;
+                actualizarVistaDestinos();
+            }
+        });
+    } else {
+        console.warn("renderizarPaginacion no está cargado. Revisa la versión de components.js en explorar.html.");
+    }
 }
 
 function pintarDestinos(lista) {

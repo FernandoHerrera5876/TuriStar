@@ -50,8 +50,8 @@ async function cargarDatosActuales() {
 document.getElementById('inputFoto').addEventListener('change', function (evento) {
     const archivo = evento.target.files[0];
     if (archivo) {
-        if (archivo.size > 3 * 1024 * 1024) { // Límite de 3MB
-            mostrarAlerta("La imagen es muy pesada. Máximo 3MB.", false);
+        if (archivo.size > 5 * 1024 * 1024) { // Límite de 5MB
+            mostrarAlerta("La imagen es muy pesada. Máximo 5MB.", false);
             return;
         }
 

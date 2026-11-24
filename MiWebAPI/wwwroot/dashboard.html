@@ -1,44 +1,167 @@
 ﻿<!doctype html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1320">
     <title>Panel de Administrador | TuriStar</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Librería para hacer las gráficas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=6.0">
+    <style>
+        .admin-glass-card {
+            background: linear-gradient(155deg, rgba(22, 35, 58, 0.96) 0%, rgba(12, 20, 34, 0.98) 100%) !important;
+            border: 1.5px solid rgba(74, 222, 128, 0.35) !important;
+            border-radius: 22px !important;
+            color: #ffffff !important;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .admin-glass-card:hover {
+                border-color: rgba(74, 222, 128, 0.72) !important;
+                box-shadow: 0 0 30px rgba(74, 222, 128, 0.22), 0 16px 38px rgba(0, 0, 0, 0.65) !important;
+            }
+
+        .admin-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.32rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(250, 204, 21, 0.14);
+            border: 1px solid rgba(250, 204, 21, 0.45);
+            color: #facc15;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        /* Tamaño compacto y centrado para las gráficas */
+        .chart-box {
+            position: relative;
+            height: 250px;
+            width: 100%;
+            max-width: 460px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 767.98px) {
+            .chart-box {
+                height: 220px;
+            }
+        }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100 bg-light">
+<body class="d-flex flex-column min-vh-100">
     <div id="navbar-placeholder"></div>
 
     <main class="container py-5 flex-grow-1">
-        <div class="mb-4">
-            <h1 class="h3 fw-bold text-dark"><i class="bi bi-bar-chart-fill text-success"></i> Estadísticas TuriStar</h1>
-            <p class="text-muted">Vista exclusiva de administrador.</p>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <span class="admin-badge-pill mb-2">
+                    <i class="bi bi-shield-lock-fill"></i> Cuenta Administrativa
+                </span>
+                <h1 class="h2 fw-bold text-white mb-1">
+                    <i class="bi bi-bar-chart-fill text-turistar-green me-2"></i>Estadísticas TuriStar
+                </h1>
+                <p class="text-muted mb-0">Vista exclusiva de administrador.</p>
+            </div>
+            <a href="explorar.html" class="btn btn-crystal-ios-neutral px-4 py-2 text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i> Volver a Explorar
+            </a>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 justify-content-center">
             <!-- Gráfica 1: Visitas/Interacciones -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-                    <h5 class="fw-bold mb-3 text-center">Lugares Más Visitados</h5>
-                    <canvas id="graficoVisitas"></canvas>
+                <div class="card admin-glass-card border-0 h-100 p-4">
+                    <h5 class="fw-bold mb-3 text-center text-white">Lugares Más Visitados</h5>
+                    <div class="chart-box">
+                        <canvas id="graficoVisitas"></canvas>
+                    </div>
                 </div>
             </div>
 
             <!-- Gráfica 2: Puntuaciones -->
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-                    <h5 class="fw-bold mb-3 text-center">Mejores Puntuaciones</h5>
-                    <canvas id="graficoPuntuaciones"></canvas>
+                <div class="card admin-glass-card border-0 h-100 p-4">
+                    <h5 class="fw-bold mb-3 text-center text-white">Mejores Puntuaciones</h5>
+                    <div class="chart-box">
+                        <canvas id="graficoPuntuaciones"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="js/config.js"></script>
-    <script src="js/components.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/config.js?v=1.0"></script>
+    <script src="js/components.js?v=6.0"></script>
+    <script>
+                (function () {
+                    /** @type {any} */
+                    const win = window;
+                    const ChartLib = win["Chart"];
+                    if (!ChartLib) return;
+
+                    ChartLib.defaults.color = "#ffffff";
+                    ChartLib.defaults.borderColor = "rgba(148, 163, 184, 0.18)";
+                    ChartLib.defaults.maintainAspectRatio = false;
+
+                    if (ChartLib.defaults.plugins?.legend?.labels) {
+                        ChartLib.defaults.plugins.legend.labels.color = "#ffffff";
+                    }
+                    if (ChartLib.defaults.plugins?.title) {
+                        ChartLib.defaults.plugins.title.color = "#ffffff";
+                    }
+                    if (ChartLib.defaults.plugins?.tooltip) {
+                        ChartLib.defaults.plugins.tooltip.titleColor = "#ffffff";
+                        ChartLib.defaults.plugins.tooltip.bodyColor = "#e2e8f0";
+                        ChartLib.defaults.plugins.tooltip.backgroundColor = "rgba(11, 19, 32, 0.94)";
+                        ChartLib.defaults.plugins.tooltip.borderColor = "rgba(74, 222, 128, 0.45)";
+                        ChartLib.defaults.plugins.tooltip.borderWidth = 1;
+                    }
+                    if (ChartLib.defaults.scale?.ticks) {
+                        ChartLib.defaults.scale.ticks.color = "#ffffff";
+                    }
+                    if (ChartLib.defaults.scale?.grid) {
+                        ChartLib.defaults.scale.grid.color = "rgba(148, 163, 184, 0.16)";
+                    }
+
+                    ChartLib.register({
+                        id: "turistarDarkTheme",
+                        /** @param {any} chart */
+                        beforeInit(chart) {
+                            try {
+                                const cfgOpts = chart.config.options || (chart.config.options = {});
+                                cfgOpts.maintainAspectRatio = false;
+                                cfgOpts.color = "#ffffff";
+
+                                if (cfgOpts.scales) {
+                                    /** @type {Record<string, any>} */
+                                    const scales = cfgOpts.scales;
+                                    for (const key of Object.keys(scales)) {
+                                        const scale = scales[key];
+                                        if (!scale || typeof scale !== "object") continue;
+                                        scale.ticks = { ...(scale.ticks || {}), color: "#ffffff" };
+                                        scale.grid = { ...(scale.grid || {}), color: "rgba(148, 163, 184, 0.16)" };
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn("Aviso al aplicar tema a la gráfica:", e);
+                            }
+                        }
+                    });
+                })();
+    </script>
+    <script src="js/dashboard.js?v=2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

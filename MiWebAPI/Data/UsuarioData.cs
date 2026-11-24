@@ -18,6 +18,9 @@ namespace MiWebAPI.Data
             Respuesta respuesta = new Respuesta();
             try
             {
+                // PASO 1 y 2 del video: generar hash bcrypt con sal aleatoria y workFactor 11
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasena, workFactor: 11);
+
                 using (SqlConnection con = new SqlConnection(_conexion))
                 {
                     SqlCommand cmd = new SqlCommand("sp_Usuario_Registrar", con);
@@ -25,8 +28,8 @@ namespace MiWebAPI.Data
                     cmd.Parameters.AddWithValue("@Nombres", usuario.Nombres);
                     cmd.Parameters.AddWithValue("@Apellidos", usuario.Apellidos);
                     cmd.Parameters.AddWithValue("@FechaNacimiento", usuario.FechaNacimiento);
-                    cmd.Parameters.AddWithValue("@Correo", usuario.Correo);
-                    cmd.Parameters.AddWithValue("@Contrasena", usuario.Contrasena);
+                    cmd.Parameters.AddWithValue("@Correo", usuario.Correo.Trim());
+                    cmd.Parameters.AddWithValue("@Contrasena", passwordHash); // Se guarda el hash, nunca texto plano
 
                     await con.OpenAsync();
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
@@ -52,33 +55,85 @@ namespace MiWebAPI.Data
             Respuesta respuesta = new Respuesta();
             try
             {
+                int idUsuario = 0;
+                string nombres = "";
+                string correoBd = "";
+                string hashGuardado = "";
+                bool esAdmin = false;
+                bool usuarioEncontrado = false;
+
                 using (SqlConnection con = new SqlConnection(_conexion))
                 {
                     SqlCommand cmd = new SqlCommand("sp_Usuario_ValidarLogin", con);
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Correo", correo);
-                    cmd.Parameters.AddWithValue("@Contrasena", contrasena);
+                    cmd.Parameters.AddWithValue("@Correo", correo.Trim());
 
                     await con.OpenAsync();
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
-                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
-                            respuesta.Mensaje = reader["Mensaje"].ToString();
+                            usuarioEncontrado = true;
+                            idUsuario = Convert.ToInt32(reader["IdUsuario"]);
+                            nombres = reader["Nombres"].ToString() ?? "";
+                            correoBd = reader["Correo"].ToString() ?? "";
+                            hashGuardado = reader["ContrasenaHash"] != DBNull.Value
+                                ? reader["ContrasenaHash"].ToString() ?? ""
+                                : "";
+                            esAdmin = reader["ES_ADMIN"] != DBNull.Value && Convert.ToBoolean(reader["ES_ADMIN"]);
+                        }
+                    }
 
-                            if (respuesta.IsSuccess)
+                    if (!usuarioEncontrado || string.IsNullOrEmpty(hashGuardado))
+                    {
+                        respuesta.IsSuccess = false;
+                        respuesta.Mensaje = "Correo o contraseña incorrectos.";
+                        return respuesta;
+                    }
+
+                    // PASO 3 del video: en el login no se descifra, se compara con Verify
+                    bool esBcrypt = hashGuardado.StartsWith("$2a$") || hashGuardado.StartsWith("$2b$") || hashGuardado.StartsWith("$2y$");
+                    bool passwordValida = false;
+
+                    if (esBcrypt)
+                    {
+                        passwordValida = BCrypt.Net.BCrypt.Verify(contrasena, hashGuardado);
+                    }
+                    else
+                    {
+                        // Respaldo temporal para cuentas creadas antes de bcrypt (como tu admin):
+                        // si coincide una última vez, la convierte automáticamente a bcrypt en la BD.
+                        passwordValida = hashGuardado == contrasena;
+                        if (passwordValida)
+                        {
+                            string nuevoHash = BCrypt.Net.BCrypt.HashPassword(contrasena, workFactor: 11);
+                            using (SqlCommand cmdMigrar = new SqlCommand("sp_Usuario_ActualizarHash", con))
                             {
-                                respuesta.Objeto = new
-                                {
-                                    IdUsuario = Convert.ToInt32(reader["IdUsuario"]),
-                                    Nombre = reader["Nombres"].ToString(),
-                                    Correo = reader["Correo"].ToString(),
-                                    EsAdmin = Convert.ToBoolean(reader["ES_ADMIN"])
-                                };
+                                cmdMigrar.CommandType = CommandType.StoredProcedure;
+                                cmdMigrar.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                                cmdMigrar.Parameters.AddWithValue("@NuevoHash", nuevoHash);
+                                await cmdMigrar.ExecuteNonQueryAsync();
                             }
                         }
                     }
+
+                    if (!passwordValida)
+                    {
+                        respuesta.IsSuccess = false;
+                        respuesta.Mensaje = "Correo o contraseña incorrectos.";
+                        return respuesta;
+                    }
+
+                    // Nunca devolvemos ContrasenaHash al navegador
+                    respuesta.IsSuccess = true;
+                    respuesta.Mensaje = "Login exitoso.";
+                    respuesta.Objeto = new
+                    {
+                        IdUsuario = idUsuario,
+                        Nombre = nombres,
+                        Correo = correoBd,
+                        EsAdmin = esAdmin
+                    };
                 }
             }
             catch (Exception ex)
@@ -185,6 +240,74 @@ namespace MiWebAPI.Data
                         {
                             respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
                             respuesta.Mensaje = reader["Mensaje"].ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
+            }
+            return respuesta;
+        }
+
+        public async Task<Respuesta> SolicitarCodigoRegistro(Usuario usuario, string codigo)
+        {
+            Respuesta respuesta = new Respuesta();
+            try
+            {
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasena, workFactor: 11);
+
+                using (SqlConnection con = new SqlConnection(_conexion))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_Registro_SolicitarCodigo", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Nombres", usuario.Nombres.Trim());
+                    cmd.Parameters.AddWithValue("@Apellidos", usuario.Apellidos.Trim());
+                    cmd.Parameters.AddWithValue("@FechaNacimiento", usuario.FechaNacimiento);
+                    cmd.Parameters.AddWithValue("@Correo", usuario.Correo.Trim().ToLowerInvariant());
+                    cmd.Parameters.AddWithValue("@ContrasenaHash", passwordHash);
+                    cmd.Parameters.AddWithValue("@Codigo", codigo);
+
+                    await con.OpenAsync();
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString() ?? "";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
+            }
+            return respuesta;
+        }
+
+        public async Task<Respuesta> ConfirmarRegistro(string correo, string codigo)
+        {
+            Respuesta respuesta = new Respuesta();
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_conexion))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_Registro_ConfirmarCodigo", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Correo", correo.Trim().ToLowerInvariant());
+                    cmd.Parameters.AddWithValue("@Codigo", codigo.Trim());
+
+                    await con.OpenAsync();
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString() ?? "";
                         }
                     }
                 }
