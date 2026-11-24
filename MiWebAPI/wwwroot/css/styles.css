@@ -223,10 +223,6 @@ h1, h2, h3, h4, h5, h6, .text-dark {
     overflow: visible !important;
 }
 
-.marquee-container:hover .marquee-track {
-    animation-play-state: paused !important;
-}
-
 .marquee-item {
     width: 340px;
     flex-shrink: 0;
@@ -491,3 +487,439 @@ main.curtain-main {
         transform: translateY(-2px);
         box-shadow: 0 0 22px rgba(74, 222, 128, 0.28), 0 12px 24px rgba(0, 0, 0, 0.55) !important;
     }
+
+/* ==========================================================
+   PAGINACIÓN GLOBAL (DARK GLASS + NEÓN VERDE)
+   ========================================================== */
+.turistar-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.turistar-page-btn {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 0.85rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    background: rgba(22, 35, 58, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+    .turistar-page-btn:hover:not(:disabled) {
+        background: rgba(74, 222, 128, 0.2);
+        border-color: #4ade80;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 0 18px rgba(74, 222, 128, 0.35);
+    }
+
+    .turistar-page-btn.active {
+        background: linear-gradient(135deg, rgba(74, 222, 128, 0.34), rgba(34, 197, 94, 0.24));
+        border-color: #4ade80;
+        color: #ffffff;
+        box-shadow: 0 0 22px rgba(74, 222, 128, 0.48), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .turistar-page-btn:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+.turistar-page-info {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.25rem;
+}
+
+/* ==========================================================
+   MINIATURAS INTERACTIVAS Y VISOR LIGHTBOX (DARK GLASS)
+   ========================================================== */
+.resena-thumb {
+    width: 100px;
+    height: 100px;
+    border: 1.5px solid rgba(74, 222, 128, 0.45);
+    cursor: zoom-in;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    transform: translateZ(0);
+}
+
+    .resena-thumb:hover {
+        transform: scale(1.12) translateY(-3px) translateZ(0);
+        border-color: #4ade80;
+        box-shadow: 0 0 24px rgba(74, 222, 128, 0.52), 0 10px 24px rgba(0, 0, 0, 0.55);
+        z-index: 15;
+    }
+
+.turistar-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(7, 13, 24, 0.86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+    .turistar-lightbox.active {
+        display: flex;
+        animation: lightboxFadeIn 0.22s ease;
+    }
+
+@keyframes lightboxFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.turistar-lightbox-box {
+    position: relative;
+    max-width: min(92vw, 960px);
+    max-height: 88vh;
+    padding: 0.75rem;
+    border-radius: 22px;
+    background: linear-gradient(155deg, rgba(22, 35, 58, 0.96), rgba(11, 19, 32, 0.98));
+    border: 1.5px solid rgba(74, 222, 128, 0.5);
+    box-shadow: 0 0 42px rgba(74, 222, 128, 0.24), 0 24px 60px rgba(0, 0, 0, 0.78);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.turistar-lightbox-img {
+    max-width: 100%;
+    max-height: 76vh;
+    border-radius: 14px;
+    object-fit: contain;
+    display: block;
+}
+
+.turistar-lightbox-btn {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(74, 222, 128, 0.55);
+    background: rgba(15, 25, 42, 0.85);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.22s ease;
+}
+
+    .turistar-lightbox-btn:hover {
+        background: rgba(74, 222, 128, 0.32);
+        border-color: #4ade80;
+        transform: scale(1.06);
+    }
+
+.turistar-lightbox-close {
+    top: -16px;
+    right: -16px;
+}
+
+.turistar-lightbox-prev {
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+    .turistar-lightbox-prev:hover {
+        transform: translateY(-50%) scale(1.06);
+    }
+
+.turistar-lightbox-next {
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+    .turistar-lightbox-next:hover {
+        transform: translateY(-50%) scale(1.06);
+    }
+
+.turistar-lightbox-counter {
+    margin-top: 0.55rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* ==========================================================
+   BLINDAJE GLOBAL DARK MODE + DISEÑO RESPONSIVO MÓVIL
+   ========================================================== */
+:root,
+html {
+    background-color: #0b1320 !important;
+    color-scheme: dark;
+    overflow-x: clip;
+}
+
+body {
+    overflow-x: clip;
+    -webkit-tap-highlight-color: rgba(74, 222, 128, 0.2);
+}
+
+    /* Evitar cajas blancas o crema por clases estándar de Bootstrap */
+    body .bg-white,
+    body .bg-light,
+    body .alert-light {
+        background: linear-gradient(155deg, rgba(22, 35, 58, 0.94) 0%, rgba(12, 20, 34, 0.98) 100%) !important;
+        color: #e2e8f0 !important;
+        border: 1px solid rgba(74, 222, 128, 0.28) !important;
+    }
+
+    body .card {
+        background-color: #121c2e;
+        color: #e2e8f0;
+    }
+
+/* Botón hamburguesa del navbar visible sobre fondo oscuro */
+.navbar-turistar .navbar-toggler {
+    border: 1px solid rgba(74, 222, 128, 0.5) !important;
+    background: rgba(22, 35, 58, 0.85) !important;
+    border-radius: 12px !important;
+    padding: 0.4rem 0.65rem !important;
+}
+
+    .navbar-turistar .navbar-toggler:focus {
+        box-shadow: 0 0 0 0.2rem rgba(74, 222, 128, 0.3) !important;
+    }
+
+.navbar-turistar .navbar-toggler-icon {
+    filter: none !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.4' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Tablets y móviles (< 992px): menú desplegable oscuro de cristal */
+@media (max-width: 991.98px) {
+    .navbar-turistar .navbar-collapse {
+        margin-top: 0.85rem;
+        margin-bottom: 0.9rem;
+        padding: 1rem;
+        border-radius: 18px;
+        background: rgba(11, 19, 32, 0.96);
+        border: 1px solid rgba(74, 222, 128, 0.32);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+    }
+
+    .navbar-turistar .navbar-nav {
+        gap: 0.35rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .navbar-turistar #loginLink,
+    .navbar-turistar #btnAdminGraficas,
+    .navbar-turistar #btnCerrarSesion {
+        margin-top: 0.25rem;
+    }
+
+    .navbar-turistar .nav-link {
+        padding: 0.55rem 0.85rem !important;
+        border-radius: 10px;
+    }
+
+        .navbar-turistar .nav-link.active,
+        .navbar-turistar .nav-link:hover {
+            background: rgba(74, 222, 128, 0.14);
+        }
+
+    .navbar-turistar .input-group,
+    .navbar-turistar form {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 0.65rem;
+    }
+
+    /* Evitar que paneles sticky bloqueen contenido al apilarse */
+    .sticky-lg-top {
+        position: static !important;
+    }
+}
+
+/* Teléfonos (< 768px) */
+@media (max-width: 767.98px) {
+    /* Corrige el bug de background-attachment: fixed en Safari/Chrome móvil */
+    .hero-home {
+        background-attachment: scroll !important;
+        height: 62vh !important;
+        min-height: 390px;
+        padding: 1.5rem 1rem;
+    }
+
+        .hero-home .display-3 {
+            font-size: 2.35rem !important;
+        }
+
+    .search-hero {
+        padding: 2.4rem 1.15rem !important;
+        border-radius: 18px !important;
+    }
+
+        .search-hero h1 {
+            font-size: 1.45rem !important;
+        }
+
+    .hero-destino {
+        height: 290px !important;
+    }
+
+        .hero-destino .display-4 {
+            font-size: 1.85rem !important;
+        }
+
+    .marquee-item {
+        width: 265px !important;
+    }
+
+    .marquee-track {
+        gap: 18px !important;
+    }
+
+    .nd-wide-surface,
+    .ep-wide-surface,
+    .profile-card,
+    .review-card .card-body,
+    .detalle-glass-card .card-body {
+        padding: 1.25rem !important;
+    }
+
+    .resena-thumb {
+        width: 82px !important;
+        height: 82px !important;
+    }
+
+    .turistar-lightbox {
+        padding: 0.75rem !important;
+    }
+
+    .turistar-lightbox-box {
+        max-width: 96vw !important;
+        padding: 0.5rem !important;
+    }
+
+    .turistar-lightbox-close {
+        top: 10px !important;
+        right: 10px !important;
+    }
+
+    .turistar-page-btn {
+        min-width: 36px;
+        height: 36px;
+        padding: 0 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    /* Evitar escalado pegado al tocar tarjetas en pantallas táctiles */
+    .destination-card:hover,
+    .feature-card:hover,
+    .review-card:hover {
+        transform: none !important;
+    }
+}
+
+/* ==========================================================
+   BOTÓN TACHE (×) PARA LIMPIAR BARRAS DE BÚSQUEDA
+   ========================================================== */
+input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.search-clear-wrap {
+    position: relative;
+}
+
+    .search-clear-wrap .form-control.search-clear-input {
+        padding-right: 2.5rem !important;
+        border-top-right-radius: 999px !important;
+        border-bottom-right-radius: 999px !important;
+    }
+
+    .search-clear-wrap.input-group-lg .form-control.search-clear-input {
+        padding-right: 3.1rem !important;
+    }
+
+.btn-clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0.78rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.search-clear-wrap.input-group-lg .btn-clear-search {
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+}
+
+.btn-clear-search:hover {
+    background: rgba(74, 222, 128, 0.25);
+    color: #ffffff;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.btn-clear-search:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* Mantener el carrusel de tarjetas siempre en movimiento aunque pase el cursor */
+.marquee-container:hover,
+.marquee-container:hover *,
+.marquee-track:hover,
+.marquee-content:hover {
+    animation-play-state: running !important;
+}
+
+.btn-glass-ios:disabled,
+.btn-crystal-ios-neutral:disabled,
+.btn-glass-ios-amber:disabled,
+.btn-glass-ios-red:disabled {
+    opacity: 0.6;
+    color: #e2e8f0 !important;
+    cursor: not-allowed;
+    transform: none !important;
+}

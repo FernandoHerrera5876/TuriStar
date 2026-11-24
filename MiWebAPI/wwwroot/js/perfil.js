@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const usuarioSesion = JSON.parse(usuarioGuardado);
+    actualizarVistaRolPerfil(Boolean(usuarioSesion.esAdmin ?? usuarioSesion.EsAdmin));
     const idUsuario = parseInt(usuarioSesion.idUsuario || usuarioSesion.IdUsuario, 10);
 
     if (!idUsuario || isNaN(idUsuario)) {
@@ -44,6 +45,10 @@ async function cargarDatosCompletos(id) {
 
         if (respuesta.ok && resultado.isSuccess && resultado.objeto) {
             const usr = resultado.objeto;
+            const esAdminBD = usr.esAdmin ?? usr.EsAdmin;
+            if (esAdminBD === true) {
+                actualizarVistaRolPerfil(true);
+            }
             const nombres = usr.nombres ?? usr.Nombres ?? "";
             const apellidos = usr.apellidos ?? usr.Apellidos ?? "";
             const correo = usr.correo ?? usr.Correo ?? "Sin correo registrado";
@@ -91,7 +96,7 @@ async function cargarMisResenas(idUsuario) {
                 const destinoTxt = resena.nombreDestino ?? resena.NombreDestino ?? "Destino";
                 const fechaRaw = resena.fechaCreacion ?? resena.FechaCreacion;
                 const idDestino = resena.idDestino ?? resena.IdDestino;
-                const fotos = resena.fotos ?? resena.Fotos;
+                const fotos = resena.fotos ?? resena.Fotos ?? resena.fotosResena;
 
                 let estrellasHTML = "";
                 for (let i = 1; i <= 5; i++) {
@@ -101,18 +106,7 @@ async function cargarMisResenas(idUsuario) {
                 }
 
                 const fecha = fechaRaw ? new Date(fechaRaw).toLocaleDateString() : "";
-
-                let galeriaHTML = "";
-                if (Array.isArray(fotos) && fotos.length > 0) {
-                    galeriaHTML = '<div class="d-flex gap-2 mt-3 flex-wrap">';
-                    fotos.forEach(url => {
-                        const urlBackend = CONFIG.API_URL_BASE.replace('/api/Auth', '').replace('/api/Resena', '').replace('/api', '');
-                        galeriaHTML += `<img src="${urlBackend}${url}" 
-                                        class="rounded-3 shadow-sm object-fit-cover" 
-                                        style="width: 100px; height: 100px; border: 1.5px solid rgba(74, 222, 128, 0.45);">`;
-                    });
-                    galeriaHTML += '</div>';
-                }
+                const galeriaHTML = construirGaleriaResenaHTML(fotos);
 
                 const html = `
                     <div class="card profile-panel-card border-0 rounded-4 mb-3">
@@ -251,6 +245,95 @@ async function cargarMisGuardados(idUsuario) {
     }
 }
 
+let editFotosOriginales = [];
+let editFotosAEliminar = new Set();
+let editArchivosNuevos = [];
+let editPreviewUrls = [];
+let actualizandoResena = false;
+
+function limpiarPreviewsEdicion() {
+    editPreviewUrls.forEach(u => URL.revokeObjectURL(u));
+    editPreviewUrls = [];
+}
+
+function renderizarFotosActualesEdicion() {
+    const cont = document.getElementById('editFotosActuales');
+    if (!cont) return;
+    cont.innerHTML = "";
+
+    if (editFotosOriginales.length === 0) {
+        cont.innerHTML = `<span class="small text-muted">Esta reseña no tiene fotos todavía.</span>`;
+        return;
+    }
+
+    editFotosOriginales.forEach((urlOriginal) => {
+        const marcada = editFotosAEliminar.has(urlOriginal);
+        const srcCompleto = obtenerUrlImagenResena(urlOriginal);
+
+        const item = document.createElement('div');
+        item.className = `edit-photo-item${marcada ? ' marked-delete' : ''}`;
+        item.innerHTML = `
+            <img src="${srcCompleto}" alt="Foto actual">
+            ${marcada ? '<span class="edit-photo-badge-del">Se borrará</span>' : ''}
+            <button type="button" class="edit-photo-action" title="${marcada ? 'Deshacer eliminación' : 'Eliminar foto'}">
+                <i class="bi ${marcada ? 'bi-arrow-counterclockwise' : 'bi-x-lg'}"></i>
+            </button>
+        `;
+
+        item.querySelector('.edit-photo-action').addEventListener('click', () => {
+            if (editFotosAEliminar.has(urlOriginal)) {
+                editFotosAEliminar.delete(urlOriginal);
+            } else {
+                editFotosAEliminar.add(urlOriginal);
+            }
+            renderizarFotosActualesEdicion();
+        });
+
+        cont.appendChild(item);
+    });
+}
+
+function renderizarPreviewsNuevasEdicion() {
+    const cont = document.getElementById('editPreviewNuevas');
+    if (!cont) return;
+
+    limpiarPreviewsEdicion();
+    cont.innerHTML = "";
+
+    editArchivosNuevos.forEach((file, index) => {
+        const blobUrl = URL.createObjectURL(file);
+        editPreviewUrls.push(blobUrl);
+
+        const item = document.createElement('div');
+        item.className = 'edit-photo-item';
+        item.innerHTML = `
+            <img src="${blobUrl}" alt="${file.name}">
+            <button type="button" class="edit-photo-action" title="Quitar foto nueva">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+
+        item.querySelector('.edit-photo-action').addEventListener('click', () => {
+            editArchivosNuevos.splice(index, 1);
+            renderizarPreviewsNuevasEdicion();
+        });
+
+        cont.appendChild(item);
+    });
+}
+
+document.addEventListener("change", (e) => {
+    if (e.target && e.target.id === "editFotosNuevas") {
+        const nuevos = Array.from(e.target.files || []);
+        if (nuevos.length > 0) {
+            editArchivosNuevos.push(...nuevos);
+            renderizarPreviewsNuevasEdicion();
+        }
+        // Limpiamos el input para permitir volver a elegir más archivos
+        e.target.value = "";
+    }
+});
+
 function abrirModalEdicion(idResena) {
     const resena = resenasUsuarioCache.get(Number(idResena));
     if (!resena) {
@@ -260,6 +343,19 @@ function abrirModalEdicion(idResena) {
 
     const calif = resena.calificacion ?? resena.Calificacion ?? 5;
     const comentario = resena.comentario ?? resena.Comentario ?? "";
+    const fotosRaw = resena.fotos ?? resena.Fotos ?? [];
+
+    editFotosOriginales = Array.isArray(fotosRaw)
+        ? fotosRaw.map(u => String(u).trim()).filter(Boolean)
+        : [];
+    editFotosAEliminar = new Set();
+    editArchivosNuevos = [];
+
+    const inputNuevas = document.getElementById('editFotosNuevas');
+    if (inputNuevas) inputNuevas.value = "";
+
+    renderizarFotosActualesEdicion();
+    renderizarPreviewsNuevasEdicion();
 
     const elId = document.getElementById('editIdResena');
     const elCalif = document.getElementById('editCalificacion');
@@ -295,6 +391,7 @@ document.addEventListener("click", async (e) => {
     if (!btn) return;
 
     e.preventDefault();
+    if (actualizandoResena) return;
 
     const alerta = document.getElementById("alertaEditarResena");
     const idResena = parseInt(document.getElementById("editIdResena")?.value, 10);
@@ -315,57 +412,35 @@ document.addEventListener("click", async (e) => {
         return;
     }
 
-    const resenaOriginal = resenasUsuarioCache.get(idResena) || {};
-    const idDestino = parseInt(resenaOriginal.idDestino ?? resenaOriginal.IdDestino ?? 0, 10);
+    const formData = new FormData();
+    formData.append("idResena", idResena);
+    formData.append("idUsuario", idUsuario);
+    formData.append("calificacion", calificacion);
+    formData.append("comentario", comentario);
 
-    const payload = {
-        IdResena: idResena,
-        idResena: idResena,
-        IdUsuario: idUsuario,
-        idUsuario: idUsuario,
-        Calificacion: calificacion,
-        calificacion: calificacion,
-        Comentario: comentario,
-        comentario: comentario
-    };
-    if (idDestino > 0) {
-        payload.IdDestino = idDestino;
-        payload.idDestino = idDestino;
-    }
+    editFotosAEliminar.forEach(url => formData.append("fotosEliminar", url));
+    editArchivosNuevos.forEach(file => formData.append("fotosNuevas", file));
 
+    actualizandoResena = true;
     btn.disabled = true;
     const textoPrevio = btn.textContent;
-    btn.textContent = "Actualizando...";
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Actualizando...';
     if (alerta) alerta.classList.add("d-none");
 
-    const rutas = [
-        { url: `${CONFIG.API_URL_BASE}/Resena/actualizar`, method: "PUT" },
-        { url: `${CONFIG.API_URL_BASE}/Resena/actualizar`, method: "POST" }
-    ];
-
     try {
-        let respuesta = null;
+        const respuesta = await fetch(`${CONFIG.API_URL_BASE}/Resena/actualizar`, {
+            method: "PUT",
+            body: formData
+        });
+
         let resultado = null;
-
-        for (const r of rutas) {
-            respuesta = await fetch(r.url, {
-                method: r.method,
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            try {
-                resultado = await respuesta.json();
-            } catch (_) {
-                resultado = null;
-            }
-
-            if (respuesta.status !== 404 && respuesta.status !== 405) {
-                break;
-            }
+        try {
+            resultado = await respuesta.json();
+        } catch (_) {
+            resultado = null;
         }
 
-        const ok = respuesta && respuesta.ok && (resultado === null || resultado.isSuccess !== false);
+        const ok = respuesta.ok && (resultado === null || resultado.isSuccess !== false);
 
         if (ok) {
             if (alerta) {
@@ -373,6 +448,7 @@ document.addEventListener("click", async (e) => {
                 alerta.className = "alert alert-success d-block small py-2 text-center mt-2";
             }
             setTimeout(() => {
+                limpiarPreviewsEdicion();
                 const modalEl = document.getElementById("modalEditarResena");
                 if (modalEl && document.activeElement && modalEl.contains(document.activeElement)) {
                     document.activeElement.blur();
@@ -384,10 +460,9 @@ document.addEventListener("click", async (e) => {
         } else {
             const msgApi = (resultado && (resultado.mensaje || resultado.message || resultado.title)) || "";
             if (alerta) {
-                alerta.textContent = `Error ${respuesta ? respuesta.status : ""}: ${msgApi || "No se pudo actualizar la reseña."}`;
+                alerta.textContent = `Error ${respuesta.status}: ${msgApi || "No se pudo actualizar la reseña."}`;
                 alerta.className = "alert alert-danger d-block small py-2 text-center mt-2";
             }
-            console.warn("Respuesta actualizar reseña:", respuesta?.status, resultado, payload);
         }
     } catch (error) {
         console.error("Error al actualizar reseña:", error);
@@ -396,6 +471,7 @@ document.addEventListener("click", async (e) => {
             alerta.className = "alert alert-danger d-block small py-2 text-center mt-2";
         }
     } finally {
+        actualizandoResena = false;
         btn.disabled = false;
         btn.textContent = textoPrevio || "Actualizar Reseña";
     }
@@ -411,54 +487,108 @@ function cerrarSesionPerfil() {
 }
 
 async function borrarCuentaPerfil(btn) {
-    if (!btn.classList.contains('confirming')) {
-        btn.classList.add('confirming');
-        const txtOrg = btn.innerHTML;
-        btn.innerHTML = '¡Es irreversible! Clic para borrar cuenta';
+    if (btn.dataset.busy === "1") return;
 
-        setTimeout(() => {
-            btn.classList.remove('confirming');
-            btn.innerHTML = txtOrg;
-        }, 3000);
-        return;
-    }
+    const confirmado = await confirmarEliminacionModal({
+        titulo: 'Eliminar cuenta',
+        mensaje: 'Se eliminará tu cuenta, tus reseñas y tus favoritos permanentemente. Si pulsas Cancelar, no se realizará ningún cambio.',
+        textoConfirmar: 'Sí, eliminar mi cuenta'
+    });
+    if (!confirmado) return;
 
     const usr = JSON.parse(localStorage.getItem('usuarioTuriStar') || 'null');
     if (!usr) return;
 
+    btn.dataset.busy = "1";
+    const htmlOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Eliminando...';
+
     const id = usr.idUsuario || usr.IdUsuario;
     try {
-        const req = await fetch(`${CONFIG.API_URL_BASE}/Usuario/eliminar/${id}`, { method: 'DELETE' });
-        if (req.ok) {
+        // Ruta corregida: Auth en lugar de Usuario
+        const req = await fetch(`${CONFIG.API_URL_BASE}/Auth/eliminar/${id}`, { method: 'DELETE' });
+        const res = await req.json().catch(() => ({}));
+
+        if (req.ok && res.isSuccess !== false) {
             localStorage.removeItem('usuarioTuriStar');
             window.location.replace("login.html");
+            return;
         }
+
+        mostrarErrorPerfil(btn, res.mensaje || res.respuesta || "No se pudo eliminar la cuenta.");
     } catch (error) {
         console.error("Error al eliminar la cuenta:", error);
+        mostrarErrorPerfil(btn, "Error de conexión con la API al intentar eliminar la cuenta.");
     }
+
+    btn.dataset.busy = "0";
+    btn.disabled = false;
+    btn.innerHTML = htmlOriginal;
+}
+
+function mostrarErrorPerfil(btn, mensaje) {
+    let alerta = document.getElementById('alertaPerfilAccion');
+    if (!alerta) {
+        alerta = document.createElement('div');
+        alerta.id = 'alertaPerfilAccion';
+        alerta.className = 'alert alert-danger small py-2 text-center rounded-3 mt-3 mb-0';
+        btn.parentElement?.appendChild(alerta);
+    }
+    alerta.textContent = mensaje;
+    alerta.classList.remove('d-none');
 }
 
 async function borrarMiResena(btn, idResena) {
-    if (!btn.classList.contains('confirming')) {
-        btn.classList.add('confirming');
-        btn.innerHTML = '<i class="bi bi-check-circle"></i> ¿Borrar?';
-        setTimeout(() => {
-            btn.classList.remove('confirming');
-            btn.innerHTML = '<i class="bi bi-trash"></i> Borrar';
-        }, 3000);
-        return;
-    }
+    if (btn.dataset.busy === "1") return;
+
+    const confirmado = await confirmarEliminacionModal({
+        titulo: 'Eliminar reseña',
+        mensaje: '¿Deseas borrar esta reseña? Haz clic en Cancelar para conservarla.',
+        textoConfirmar: 'Sí, borrar reseña'
+    });
+    if (!confirmado) return;
 
     const usr = JSON.parse(localStorage.getItem('usuarioTuriStar') || 'null');
     if (!usr) return;
     const idUsr = usr.idUsuario || usr.IdUsuario;
 
+    btn.dataset.busy = "1";
+    const htmlOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
     try {
         const req = await fetch(`${CONFIG.API_URL_BASE}/Resena/eliminar/${idResena}/${idUsr}`, { method: 'DELETE' });
         if (req.ok) {
-            cargarMisResenas(idUsr);
+            await cargarMisResenas(idUsr);
+            return;
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error al eliminar reseña:", error);
+    }
+
+    btn.dataset.busy = "0";
+    btn.disabled = false;
+    btn.innerHTML = htmlOriginal;
+}
+
+function actualizarVistaRolPerfil(esAdmin) {
+    const tipoCuentaEl = document.getElementById('perfilTipoCuenta')
+        || document.querySelector('main .text-turistar-green.text-uppercase');
+    const btnGraficas = document.getElementById('btnPerfilGraficas');
+
+    if (esAdmin) {
+        if (tipoCuentaEl) {
+            tipoCuentaEl.innerHTML = '<i class="bi bi-shield-lock-fill me-1"></i> Cuenta Administrativa';
+            tipoCuentaEl.style.color = '#facc15';
+        }
+        if (btnGraficas) btnGraficas.classList.remove('d-none');
+    } else {
+        if (tipoCuentaEl) {
+            tipoCuentaEl.textContent = 'Cuenta de Viajero';
+            tipoCuentaEl.style.color = '';
+        }
+        if (btnGraficas) btnGraficas.classList.add('d-none');
     }
 }

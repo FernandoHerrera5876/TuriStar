@@ -112,16 +112,31 @@ namespace MiWebAPI.Data
                     {
                         while (await reader.ReadAsync())
                         {
+                            // Extraer y separar las URLs de fotos de la reseña
+                            string fotosBD = reader["FOTOS_RESENA"] != DBNull.Value
+                                ? reader["FOTOS_RESENA"].ToString()
+                                : "";
+
+                            List<string> listaFotos = new List<string>();
+                            if (!string.IsNullOrWhiteSpace(fotosBD))
+                            {
+                                listaFotos = fotosBD
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(f => f.Trim())
+                                    .ToList();
+                            }
+
                             lista.Add(new Resena
                             {
                                 IdResena = Convert.ToInt64(reader["ID_RESENA"]),
                                 Calificacion = Convert.ToDecimal(reader["CALIFICACION"]),
-                                Comentario = reader["COMENTARIO"].ToString(),
+                                Comentario = reader["COMENTARIO"] != DBNull.Value ? reader["COMENTARIO"].ToString() : "",
                                 FechaCreacion = reader["FECHA_CREACION"] != DBNull.Value ? Convert.ToDateTime(reader["FECHA_CREACION"]) : DateTime.Now,
-                                NombreUsuario = reader["NombreUsuario"].ToString(),
+                                NombreUsuario = reader["NombreUsuario"] != DBNull.Value ? reader["NombreUsuario"].ToString() : "Viajero",
                                 FotoUsuario = reader["FotoUsuario"] != DBNull.Value ? reader["FotoUsuario"].ToString() : null,
-                                NombreDestino = reader["NombreDestino"].ToString(),
-                                IdDestino = Convert.ToInt64(reader["ID_DESTINO"])
+                                NombreDestino = reader["NombreDestino"] != DBNull.Value ? reader["NombreDestino"].ToString() : "",
+                                IdDestino = Convert.ToInt64(reader["ID_DESTINO"]),
+                                Fotos = listaFotos
                             });
                         }
                     }
@@ -204,7 +219,7 @@ namespace MiWebAPI.Data
             return respuesta;
         }
 
-        public async Task InsertarFotoResena(int idResena, string urlFoto)
+        public async Task InsertarFotoResena(long idResena, string urlFoto)
         {
             using (SqlConnection con = new SqlConnection(_conexion))
             {
@@ -215,6 +230,38 @@ namespace MiWebAPI.Data
                 await con.OpenAsync();
                 await cmd.ExecuteNonQueryAsync();
             }
+        }
+
+        public async Task<Respuesta> EliminarFotoResena(long idResena, int idUsuario, string urlFoto)
+        {
+            Respuesta respuesta = new Respuesta();
+            try
+            {
+                using (SqlConnection con = new SqlConnection(_conexion))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_FotoResena_Eliminar", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@IdResena", idResena);
+                    cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
+                    cmd.Parameters.AddWithValue("@UrlFoto", urlFoto);
+
+                    await con.OpenAsync();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            respuesta.IsSuccess = Convert.ToInt32(reader["IsSuccess"]) == 1;
+                            respuesta.Mensaje = reader["Mensaje"].ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.IsSuccess = false;
+                respuesta.Mensaje = ex.Message;
+            }
+            return respuesta;
         }
 
         public async Task<Respuesta> Eliminar(int idResena, int idUsuario)

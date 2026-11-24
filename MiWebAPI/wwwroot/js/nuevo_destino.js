@@ -1,97 +1,229 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
-    const usuarioGuardado = localStorage.getItem('usuarioTuriStar');
-    if (!usuarioGuardado) window.location.replace("login.html");
+﻿let enviandoDestino = false;
 
-    // Revisar si la URL trae un ?editId=...
+function mostrarAlerta(mensaje, esExito) {
+    const alerta = document.getElementById("alertaDestino");
+    if (!alerta) return;
+    alerta.textContent = mensaje;
+    alerta.className = `alert small py-2 text-center rounded-3 mb-3 ${esExito ? "alert-success" : "alert-danger"}`;
+    alerta.classList.remove("d-none");
+}
+
+async function cargarCategoriasSelect() {
+    const select = document.getElementById("ndCategoria");
+    if (!select) return;
+
+    try {
+        const res = await fetch(`${CONFIG.API_URL_BASE}/Destino/categorias`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (data.isSuccess && Array.isArray(data.objeto) && data.objeto.length > 0) {
+            select.innerHTML = `<option value="" disabled selected>Selecciona...</option>`;
+            data.objeto.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat.idCategoria ?? cat.IdCategoria;
+                opt.textContent = cat.nombre ?? cat.Nombre;
+                select.appendChild(opt);
+            });
+        } else {
+            select.innerHTML = `<option value="1">General</option>`;
+        }
+    } catch (e) {
+        console.error("Error cargando categorías:", e);
+        select.innerHTML = `<option value="1">General</option>`;
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const usuarioGuardado = localStorage.getItem('usuarioTuriStar');
+    if (!usuarioGuardado) {
+        window.location.replace("login.html");
+        return;
+    }
+
+    // 1. Primero llenamos las categorías para poder seleccionar la actual si estamos editando
+    await cargarCategoriasSelect();
+
+    // 2. Revisar si la URL trae ?editId=...
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('editId');
 
+    // Configurar botón de Cancelar según si estamos creando o editando
+    const btnCancelar = document.getElementById('btnCancelarDestino');
+    if (btnCancelar) {
+        btnCancelar.href = editId ? `detalle.html?id=${encodeURIComponent(editId)}` : 'explorar.html';
+        if (editId) {
+            btnCancelar.innerHTML = '<i class="bi bi-x-circle me-1"></i> Cancelar edición';
+        }
+    }
+
     if (editId) {
-        document.getElementById('btnGuardarDestino').textContent = "Actualizar Lugar";
-        document.querySelector('h1').textContent = "Editar Destino";
+        const btn = document.getElementById('btnGuardarDestino');
+        const titulo = document.querySelector('h1');
+        if (titulo) titulo.textContent = "Editar Destino";
 
-        // Bloqueamos la foto para evitar sobreescribirla accidentalmente al editar textos
-        document.getElementById('ndUrlFoto').removeAttribute('required');
+        // Bloquear botón con indicador de carga mientras llegan los datos actuales
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cargando datos...';
+        }
 
-        // Cargar los datos actuales del lugar en los campos
+        // Al editar la foto es opcional (si no elige nueva, se mantiene la actual)
+        document.getElementById('ndUrlFoto')?.removeAttribute('required');
+
         try {
-            const res = await fetch(`${CONFIG.API_URL_BASE}/Destino/${editId}`);
-            const data = await res.json();
-            if (data.isSuccess) {
-                document.getElementById('ndNombre').value = data.objeto.nombre;
-                document.getElementById('ndMunicipio').value = data.objeto.municipio;
-                document.getElementById('ndDescripcion').value = data.objeto.descripcion;
-                document.getElementById('hLu').value = data.objeto.horarioLunes;
-                document.getElementById('hMa').value = data.objeto.horarioMartes;
-                document.getElementById('hMi').value = data.objeto.horarioMiercoles;
-                document.getElementById('hJu').value = data.objeto.horarioJueves;
-                document.getElementById('hVi').value = data.objeto.horarioViernes;
-                document.getElementById('hSa').value = data.objeto.horarioSabado;
-                document.getElementById('hDo').value = data.objeto.horarioDomingo;
+            const res = await fetch(`${CONFIG.API_URL_BASE}/Destino/${encodeURIComponent(editId)}`);
+
+            if (res.status === 404) {
+                mostrarAlerta(`El destino que intentas editar (ID ${editId}) no existe o fue eliminado.`, false);
+                if (btn) btn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Registro no disponible';
+                if (btnCancelar) {
+                    btnCancelar.href = 'explorar.html';
+                    btnCancelar.innerHTML = '<i class="bi bi-arrow-left me-1"></i> Volver a Explorar';
+                }
+                return;
             }
-        } catch (e) { console.error(e); }
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+
+            if (data.isSuccess && data.objeto) {
+                const d = data.objeto;
+                document.getElementById('ndNombre').value = d.nombre || "";
+                document.getElementById('ndMunicipio').value = d.municipio || "";
+                document.getElementById('ndDescripcion').value = d.descripcion || "";
+                document.getElementById('ndPrecioEntrada').value = d.precioEntrada ?? 0;
+                document.getElementById('ndPrecioEstacionamiento').value = d.precioEstacionamiento ?? 0;
+                document.getElementById('ndComoLlegar').value = d.comoLlegar || "";
+                if (d.idCategoria) document.getElementById('ndCategoria').value = d.idCategoria;
+                if (d.latitud) document.getElementById('ndLatitud').value = d.latitud;
+                if (d.longitud) document.getElementById('ndLongitud').value = d.longitud;
+
+                document.getElementById('hLu').value = d.horarioLunes || "";
+                document.getElementById('hMa').value = d.horarioMartes || "";
+                document.getElementById('hMi').value = d.horarioMiercoles || "";
+                document.getElementById('hJu').value = d.horarioJueves || "";
+                document.getElementById('hVi').value = d.horarioViernes || "";
+                document.getElementById('hSa').value = d.horarioSabado || "";
+                document.getElementById('hDo').value = d.horarioDomingo || "";
+
+                // Mostrar vista previa de la foto actual
+                if (d.urlFoto) {
+                    const previewBox = document.getElementById("ndPreviewBox");
+                    const previewImg = document.getElementById("ndPreviewImg");
+                    const previewName = document.getElementById("ndPreviewName");
+                    if (previewBox && previewImg) {
+                        previewImg.src = d.urlFoto;
+                        if (previewName) previewName.textContent = "Fotografía actual";
+                        previewBox.classList.add("active");
+                    }
+                }
+
+                // Habilitar el botón una vez cargados los datos
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Actualizar Lugar';
+                }
+            } else {
+                mostrarAlerta(data.respuesta || "No se encontró el destino solicitado.", false);
+                if (btn) btn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Registro no disponible';
+            }
+        } catch (e) {
+            console.error("Error cargando destino para edición:", e);
+            mostrarAlerta("No se pudo conectar con la API para cargar el destino. Verifica tu conexión e intenta de nuevo.", false);
+            if (btn) btn.innerHTML = '<i class="bi bi-wifi-off me-1"></i> Sin conexión con la API';
+        }
     }
 });
 
 document.getElementById("formNuevoDestino").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const btn = document.getElementById("btnGuardarDestino");
-    btn.disabled = true;
-    btn.textContent = "Procesando imagen y datos...";
+
+    if (enviandoDestino) return;
 
     const nombre = document.getElementById("ndNombre").value.trim();
     const municipio = document.getElementById("ndMunicipio").value.trim();
+    const descripcion = document.getElementById("ndDescripcion").value.trim();
+
+    if (!nombre || !municipio || !descripcion) {
+        mostrarAlerta("Por favor completa el nombre, municipio y descripción del lugar.", false);
+        return;
+    }
+
+    enviandoDestino = true;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('editId');
+    const btn = document.getElementById("btnGuardarDestino");
+    const htmlOriginalBtn = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando imagen y datos...';
+
     const inputArchivo = document.getElementById("ndUrlFoto");
 
-    let lat = 20.1010;
-    let lng = -98.7591;
+    const latInput = parseFloat(document.getElementById("ndLatitud").value);
+    const lngInput = parseFloat(document.getElementById("ndLongitud").value);
+    let lat = !isNaN(latInput) ? latInput : 20.1010;
+    let lng = !isNaN(lngInput) ? lngInput : -98.7591;
     let rutaImagenLocal = "";
+    let guardadoExitoso = false;
 
     try {
-        // PASO 1: SUBIR LA IMAGEN FÍSICA AL SERVIDOR
+        // PASO 1: SUBIR FOTO SI SE SELECCIONÓ UNA NUEVA
         if (inputArchivo.files.length > 0) {
             const formData = new FormData();
             formData.append("archivo", inputArchivo.files[0]);
 
             const resUpload = await fetch(`${CONFIG.API_URL_BASE}/Upload/imagen`, {
                 method: "POST",
-                body: formData // OJO: Con FormData NO se pone Content-Type en los headers, el navegador lo pone solo
+                body: formData
             });
+
+            if (!resUpload.ok) throw new Error(`Error al subir imagen (HTTP ${resUpload.status})`);
 
             const dataUpload = await resUpload.json();
             if (dataUpload.isSuccess) {
-                rutaImagenLocal = dataUpload.url; // Obtenemos el "/img/nombre.jpg"
+                rutaImagenLocal = dataUpload.url;
             } else {
-                mostrarAlerta("Error al subir la fotografía.", false);
-                btn.disabled = false;
-                btn.textContent = "Guardar y Crear Reseña";
-                return; // Detenemos todo si la foto falló
+                mostrarAlerta(dataUpload.respuesta || dataUpload.mensaje || "Error al subir la fotografía.", false);
+                return;
             }
         }
 
-        // PASO 2: OBTENER COORDENADAS
-        const busqueda = `${nombre}, ${municipio}, Hidalgo, México`;
-        try {
-            const resGeo = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(busqueda)}`);
-            const dataGeo = await resGeo.json();
-            if (dataGeo && dataGeo.length > 0) {
-                lat = parseFloat(dataGeo[0].lat);
-                lng = parseFloat(dataGeo[0].lon);
+        // PASO 2: SOLO BUSCAR COORDENADAS SI EL USUARIO NO LAS ESCRIBIÓ
+        if (isNaN(latInput) || isNaN(lngInput)) {
+            const busqueda = `${nombre}, ${municipio}, Hidalgo, México`;
+            try {
+                const resGeo = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(busqueda)}`);
+                const dataGeo = await resGeo.json();
+                if (dataGeo && dataGeo.length > 0) {
+                    lat = parseFloat(dataGeo[0].lat);
+                    lng = parseFloat(dataGeo[0].lon);
+                }
+            } catch (err) {
+                console.warn("Usando coordenadas por defecto.");
             }
-        } catch (err) { console.warn("Usando coordenadas por defecto."); }
+        }
 
-        // PASO 3: GUARDAR DESTINO EN BASE DE DATOS
-        const urlParams = new URLSearchParams(window.location.search);
-        const editId = urlParams.get('editId');
+        // PASO 3: GUARDAR O ACTUALIZAR EN BASE DE DATOS
+        const precioEntrada = parseFloat(document.getElementById("ndPrecioEntrada").value);
+        const precioEst = parseFloat(document.getElementById("ndPrecioEstacionamiento").value);
+        const idCategoria = parseInt(document.getElementById("ndCategoria").value, 10);
 
         const datos = {
-            idDestino: editId ? parseInt(editId) : 0, // Si editamos mandamos el ID, sino 0
+            idDestino: editId ? parseInt(editId, 10) : 0,
             nombre: nombre,
             municipio: municipio,
-            descripcion: document.getElementById("ndDescripcion").value.trim(),
+            descripcion: descripcion,
             urlFoto: rutaImagenLocal,
             latitud: lat,
             longitud: lng,
+            precioEntrada: !isNaN(precioEntrada) && precioEntrada >= 0 ? precioEntrada : 0,
+            precioEstacionamiento: !isNaN(precioEst) && precioEst >= 0 ? precioEst : 0,
+            comoLlegar: document.getElementById("ndComoLlegar").value.trim(),
+            idCategoria: !isNaN(idCategoria) ? idCategoria : 0,
             horarioLunes: document.getElementById("hLu").value.trim(),
             horarioMartes: document.getElementById("hMa").value.trim(),
             horarioMiercoles: document.getElementById("hMi").value.trim(),
@@ -101,7 +233,6 @@ document.getElementById("formNuevoDestino").addEventListener("submit", async (e)
             horarioDomingo: document.getElementById("hDo").value.trim()
         };
 
-        // Decidimos si registramos o actualizamos
         const rutaEndpoint = editId ? `${CONFIG.API_URL_BASE}/Destino/actualizar` : `${CONFIG.API_URL_BASE}/Destino/registrar`;
         const metodoHttp = editId ? "PUT" : "POST";
 
@@ -114,16 +245,25 @@ document.getElementById("formNuevoDestino").addEventListener("submit", async (e)
         const resultado = await respuesta.json();
 
         if (respuesta.ok && resultado.isSuccess) {
+            guardadoExitoso = true;
+            btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> ¡Guardado! Redirigiendo...';
             mostrarAlerta(editId ? "Lugar actualizado. Redirigiendo..." : "Lugar agregado. Redirigiendo...", true);
-            setTimeout(() => { window.location.href = `detalle.html?id=${editId ? editId : resultado.idDestino}`; }, 1500);
+
+            const idDestinoFinal = editId ? editId : (resultado.idDestino || resultado.IdDestino);
+            setTimeout(() => {
+                window.location.replace(`detalle.html?id=${idDestinoFinal}`);
+            }, 1200);
         } else {
-            mostrarAlerta(resultado.respuesta || "Error al guardar el lugar.", false);
+            mostrarAlerta(resultado.respuesta || resultado.mensaje || "Error al guardar el lugar.", false);
         }
     } catch (error) {
         console.error(error);
-        mostrarAlerta("Error de conexión al servidor.", false);
+        mostrarAlerta("Error de conexión con la API. Verifica que el servidor esté disponible.", false);
     } finally {
-        btn.disabled = false;
-        btn.textContent = "Guardar y Crear Reseña";
+        if (!guardadoExitoso) {
+            enviandoDestino = false;
+            btn.disabled = false;
+            btn.innerHTML = htmlOriginalBtn;
+        }
     }
 });

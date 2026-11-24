@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css?v=6.0">
     <style>
         .map-container {
             height: 75vh;
@@ -32,7 +32,7 @@
         }
 
         .location-list {
-            height: 75vh;
+            height: calc(75vh - 115px);
             overflow-y: auto;
             padding: 10px 14px 16px 10px;
         }
@@ -135,20 +135,26 @@
 
         <div class="row g-4">
             <!-- Barra Lateral con Lugares (En móvil queda debajo del mapa) -->
-            <div class="col-lg-3 col-md-4 order-2 order-md-1">
-                <div class="location-list" id="listaLugaresMapa">
+            <div class="col-lg-3 col-md-4 order-2 order-md-1 d-flex flex-column">
+                <div class="location-list flex-grow-1" id="listaLugaresMapa">
                     <!-- Spinner de carga -->
                     <div class="text-center my-4" id="spinnerMapa">
                         <div class="spinner-border text-success spinner-border-sm" role="status"></div>
                         <p class="small text-secondary mt-2">Cargando lugares...</p>
                     </div>
                 </div>
+
+                <!-- Paginación compacta del mapa -->
+                <nav id="paginacionMapa" class="turistar-pagination mt-2" aria-label="Paginación de lugares en mapa"></nav>
+
+                <a href="explorar.html" class="btn w-100 mt-3" style="background: rgba(74, 222, 128, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(74, 222, 128, 0.55); color: #ffffff; border-radius: 999px; padding: 0.65rem 1.4rem; font-weight: 600; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 6px 18px rgba(0, 0, 0, 0.35);">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Ver catálogo completo
+                </a>
             </div>
 
             <!-- Contenedor del Mapa (En móvil aparece primero arriba) -->
             <div class="col-lg-9 col-md-8 order-1 order-md-2">
                 <div class="map-container position-relative" id="contenedorMapaPrincipal">
-                    <!-- Le agregamos el ID 'iframeMapa' -->
                     <iframe id="iframeMapa" src="https://www.google.com/maps?q=20.1221768,-98.7360212&hl=es&z=9&output=embed" width="100%" height="100%" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
@@ -156,8 +162,8 @@
     </main>
 
     <script src="js/config.js?v=1.0"></script>
-    <script src="js/components.js?v=1.0"></script>
-    <script src="js/mapa.js?v=7.0"></script>
+    <script src="js/components.js?v=4.0"></script>
+    <script src="js/mapa.js?v=8.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

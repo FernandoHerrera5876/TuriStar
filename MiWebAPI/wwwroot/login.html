@@ -6,30 +6,40 @@
     <title>TuriStar | Iniciar Sesión / Registrarse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=6.0">
     <style>
         .login-container {
-            height: calc(100vh - 64px);
+            min-height: calc(100vh - 72px);
         }
 
         .hero-image {
-            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%), url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+            background: linear-gradient(to top, rgba(11, 19, 32, 0.85) 0%, rgba(11, 19, 32, 0.25) 55%, rgba(11, 19, 32, 0.15) 100%), url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1000&auto=format&fit=crop') center/cover no-repeat;
+            min-height: calc(100vh - 72px);
             height: 100%;
-            border-radius: 0 20px 20px 0;
+            border-radius: 0 24px 24px 0;
+            border-right: 1px solid rgba(74, 222, 128, 0.28);
         }
 
-        /* La tarjeta usa .destination-card (borde neón); aquí solo quitamos el salto al pasar el mouse */
-        .login-card.destination-card:hover {
-            transform: none;
+        .login-card.destination-card {
+            z-index: 1;
         }
 
-        /* Pestañas adaptadas al tema oscuro */
+            .login-card.destination-card:hover {
+                transform: none;
+                z-index: 1;
+            }
+
         .tab-active {
             border-bottom: 2px solid #4ade80;
             color: #4ade80;
-            font-weight: 600;
+            font-weight: 700;
             padding-bottom: 8px;
             cursor: pointer;
+            text-shadow: 0 0 12px rgba(74, 222, 128, 0.35);
         }
 
         .tab-inactive {
@@ -52,9 +62,10 @@
                 display: block;
             }
 
-        /* Botón secundario: pastilla con borde verde, combina con .btn-glass-ios */
         .btn-outline-glass {
-            background: transparent;
+            background: rgba(74, 222, 128, 0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(74, 222, 128, 0.45);
             color: #4ade80 !important;
             font-weight: 600;
@@ -64,108 +75,304 @@
         }
 
             .btn-outline-glass:hover {
-                background: rgba(74, 222, 128, 0.12);
+                background: rgba(74, 222, 128, 0.18);
                 border-color: #4ade80;
+                color: #ffffff !important;
                 transform: translateY(-2px);
+                box-shadow: 0 0 20px rgba(74, 222, 128, 0.28);
             }
 
-        /* Inputs: placeholder y autocompletado del navegador (evita el fondo azul claro) */
-        .input-yellow::placeholder {
-            color: #64748b !important;
+        .input-yellow {
+            border-radius: 12px !important;
+            color-scheme: dark;
         }
 
-        .input-yellow:-webkit-autofill,
-        .input-yellow:-webkit-autofill:hover,
-        .input-yellow:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0 1000px #162235 inset !important;
-            -webkit-text-fill-color: #ffffff !important;
-            caret-color: #ffffff;
-            border: 1px solid #283852 !important;
+            .input-yellow::placeholder {
+                color: #64748b !important;
+            }
+
+            .input-yellow[type="date"]::-webkit-calendar-picker-indicator {
+                filter: invert(0.85) sepia(0.4) saturate(3) hue-rotate(85deg);
+                cursor: pointer;
+            }
+
+            .input-yellow:-webkit-autofill,
+            .input-yellow:-webkit-autofill:hover,
+            .input-yellow:-webkit-autofill:focus {
+                -webkit-box-shadow: 0 0 0 1000px #162235 inset !important;
+                -webkit-text-fill-color: #ffffff !important;
+                caret-color: #ffffff;
+                border: 1px solid #283852 !important;
+            }
+
+            .input-yellow.campo-invalido {
+                border-color: #f87171 !important;
+                box-shadow: 0 0 0 0.2rem rgba(248, 113, 113, 0.22) !important;
+            }
+
+            .input-yellow.campo-valido {
+                border-color: #4ade80 !important;
+                box-shadow: 0 0 0 0.2rem rgba(74, 222, 128, 0.2) !important;
+            }
+
+        /* Botón de mostrar/ocultar contraseña */
+        .password-wrapper {
+            position: relative;
         }
+
+            .password-wrapper .form-control {
+                padding-right: 2.6rem !important;
+            }
+
+        .btn-toggle-pass {
+            position: absolute;
+            top: 50%;
+            right: 0.65rem;
+            transform: translateY(-50%);
+            background: transparent;
+            border: 0;
+            color: #94a3b8;
+            padding: 0.2rem 0.35rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+            .btn-toggle-pass:hover {
+                color: #4ade80;
+            }
+
+        /* Mensajes de feedback en vivo */
+        .field-feedback {
+            font-size: 0.76rem;
+            margin-top: 0.35rem;
+            display: none;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+            .field-feedback.show {
+                display: flex;
+            }
+
+            .field-feedback.invalid {
+                color: #fca5a5;
+            }
+
+            .field-feedback.valid {
+                color: #4ade80;
+            }
+
+        /* Caja de requisitos de contraseña segura */
+        .password-rules-box {
+            margin-top: 0.65rem;
+            padding: 0.8rem 0.95rem;
+            border-radius: 14px;
+            background: rgba(11, 19, 32, 0.78);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: border-color 0.25s ease;
+        }
+
+            .password-rules-box.all-valid {
+                border-color: rgba(74, 222, 128, 0.55);
+                box-shadow: 0 0 18px rgba(74, 222, 128, 0.14);
+            }
+
+        .strength-track {
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.2);
+            overflow: hidden;
+            margin-bottom: 0.55rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.28s ease, background-color 0.28s ease;
+        }
+
+        .password-missing-summary {
+            font-size: 0.76rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+        }
+
+        .password-rules-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.28rem;
+            font-size: 0.77rem;
+        }
+
+            .password-rules-list li {
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+                color: #94a3b8;
+                transition: color 0.2s ease;
+            }
+
+                .password-rules-list li.ok {
+                    color: #4ade80;
+                }
+
+                .password-rules-list li.missing {
+                    color: #fca5a5;
+                }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
     <!-- Navbar inyectado por JS -->
     <div id="navbar-placeholder"></div>
 
-    <div class="row g-0 flex-grow-1 login-container">
-        <!-- Imagen Lateral -->
-        <div class="col-lg-6 d-none d-lg-block">
-            <div class="hero-image position-relative d-flex align-items-end p-5 text-white">
-                <div>
-                    <h2 class="fw-bold display-6 mb-2">Grutas de Tolantongo</h2>
-                    <p class="mb-0 fs-5 text-light">Sumérgete en el paraíso termal escondido en el Cardonal, Hidalgo.</p>
+    <main class="flex-grow-1">
+        <div class="row g-0 login-container">
+            <!-- Imagen Lateral -->
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="hero-image position-relative d-flex align-items-end p-5 text-white">
+                    <div>
+                        <span class="text-turistar-green fw-bold text-uppercase d-block mb-2" style="letter-spacing: 2px; font-size: 0.78rem;">Hidalgo, México</span>
+                        <h2 class="fw-bold display-6 mb-2">Grutas de Tolantongo</h2>
+                        <p class="mb-0 fs-5 text-light">Sumérgete en el paraíso termal escondido en el Cardonal, Hidalgo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formularios -->
+            <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center px-3 px-sm-4 py-5">
+                <div class="card destination-card login-card rounded-4" style="max-width: 450px; width: 100%;">
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
+                            <i class="bi bi-geo-alt-fill fs-3 text-warning"></i>
+                            <h1 class="h4 fw-bold mb-0 text-white">Bienvenido a TuriStar</h1>
+                        </div>
+
+                        <!-- Pestañas -->
+                        <div class="d-flex mb-4 text-center">
+                            <div id="tabLogin" class="w-50 tab-active" onclick="switchTab('login')">Iniciar Sesión</div>
+                            <div id="tabRegistro" class="w-50 tab-inactive" onclick="switchTab('registro')">Registrarse</div>
+                        </div>
+
+                        <!-- Contenedor de Alertas -->
+                        <div id="mensajeAlerta" class="alert d-none py-2 px-3 small" role="alert"></div>
+
+                        <!-- Formulario de Iniciar Sesión -->
+                        <form id="formLogin" class="form-section active" novalidate>
+                            <div class="mb-3">
+                                <label for="loginCorreo" class="form-label fw-medium small mb-1 text-light">Correo Electrónico</label>
+                                <input id="loginCorreo" type="email" class="form-control input-yellow p-2" placeholder="ejemplo@correo.com" autocomplete="email" required>
+                                <div id="feedbackLoginCorreo" class="field-feedback"></div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="loginPassword" class="form-label fw-medium small mb-1 text-light">Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input id="loginPassword" type="password" class="form-control input-yellow p-2" placeholder="••••••••••••" autocomplete="current-password" required>
+                                    <button type="button" class="btn-toggle-pass" data-target="loginPassword" aria-label="Mostrar u ocultar contraseña">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button id="btnLogin" type="submit" class="btn btn-glass-ios w-100 mb-3">Iniciar Sesión</button>
+                            <button type="button" class="btn btn-outline-glass w-100" onclick="switchTab('registro')">Crear una Cuenta Nueva</button>
+                        </form>
+
+                        <!-- Formulario de Registro -->
+                        <form id="formRegistro" class="form-section" novalidate>
+                            <div class="mb-3">
+                                <label for="regNombres" class="form-label fw-medium small mb-1 text-light">Nombre(s)</label>
+                                <input id="regNombres" type="text" class="form-control input-yellow p-2" placeholder="Ana" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regApellidos" class="form-label fw-medium small mb-1 text-light">Apellidos</label>
+                                <input id="regApellidos" type="text" class="form-control input-yellow p-2" placeholder="Perez Hernandez" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regFechaNac" class="form-label fw-medium small mb-1 text-light">Fecha de nacimiento</label>
+                                <input id="regFechaNac" type="date" class="form-control input-yellow p-2" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="regCorreo" class="form-label fw-medium small mb-1 text-light">Correo Electrónico</label>
+                                <input id="regCorreo" type="email" class="form-control input-yellow p-2" placeholder="ejemplo@correo.com" autocomplete="email" required>
+                                <div id="feedbackRegCorreo" class="field-feedback"></div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="regPassword" class="form-label fw-medium small mb-1 text-light">Contraseña</label>
+                                <div class="password-wrapper">
+                                    <input id="regPassword" type="password" class="form-control input-yellow p-2" placeholder="••••••••••••" autocomplete="new-password" required>
+                                    <button type="button" class="btn-toggle-pass" data-target="regPassword" aria-label="Mostrar u ocultar contraseña">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Panel en vivo de contraseña segura -->
+                                <div id="passwordRulesBox" class="password-rules-box">
+                                    <div class="strength-track">
+                                        <div id="passwordStrengthFill" class="strength-fill"></div>
+                                    </div>
+                                    <div id="passwordMissingSummary" class="password-missing-summary">
+                                        Tu contraseña debe cumplir con:
+                                    </div>
+                                    <ul class="password-rules-list">
+                                        <li id="ruleLength"><i class="bi bi-circle"></i> Mínimo 8 caracteres</li>
+                                        <li id="ruleUpper"><i class="bi bi-circle"></i> Al menos una letra mayúscula (A-Z)</li>
+                                        <li id="ruleNumber"><i class="bi bi-circle"></i> Al menos un número (0-9)</li>
+                                        <li id="ruleSpecial"><i class="bi bi-circle"></i> Al menos un carácter especial (!@#$%^&amp;*...)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button id="btnRegistro" type="submit" class="btn btn-glass-ios w-100 mb-3">Crear cuenta</button>
+                            <button type="button" class="btn btn-outline-glass w-100" onclick="switchTab('login')">Volver a Iniciar Sesión</button>
+                        </form>
+                        <!-- Paso 2 del Registro: Verificación de código por correo -->
+                        <form id="formVerificarCodigo" class="form-section">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-envelope-check-fill text-turistar-green fs-1 d-block mb-2"></i>
+                                <h2 class="h5 fw-bold text-white mb-1">Verifica tu correo</h2>
+                                <p class="small text-secondary mb-0">
+                                    Enviamos un código de 6 dígitos a <strong id="correoVerificacionTexto" class="text-white"></strong>
+                                </p>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="inputCodigoVerificacion" class="form-label fw-medium small mb-1 text-light">Código de verificación</label>
+                                <input id="inputCodigoVerificacion"
+                                       type="text"
+                                       inputmode="numeric"
+                                       maxlength="6"
+                                       autocomplete="one-time-code"
+                                       class="form-control input-yellow p-2 text-center fw-bold fs-4"
+                                       style="letter-spacing: 0.45rem;"
+                                       placeholder="000000"
+                                       required>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button id="btnConfirmarCodigo" type="submit" class="btn btn-glass-ios w-100 py-2 fw-semibold">
+                                    <i class="bi bi-check-circle me-1"></i> Verificar y crear cuenta
+                                </button>
+
+                                <button id="btnReenviarCodigo" type="button" class="btn btn-crystal-ios-neutral w-100 py-2 fw-medium">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Reenviar código
+                                </button>
+
+                                <button id="btnVolverRegistro" type="button" class="btn btn-crystal-ios-neutral w-100 py-2 fw-medium">
+                                    <i class="bi bi-arrow-left me-1"></i> Cambiar datos / volver
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+    </main>
 
-        <!-- Formularios -->
-        <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4 overflow-auto">
-            <div class="card destination-card login-card rounded-4" style="max-width: 420px; width: 100%;">
-                <div class="card-body p-4 p-md-5">
-
-                    <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
-                        <i class="bi bi-geo-alt fs-3 text-warning"></i>
-                        <h1 class="h4 fw-bold mb-0 text-dark">Bienvenido a TuriStar</h1>
-                    </div>
-
-                    <!-- Pestañas -->
-                    <div class="d-flex mb-4 text-center">
-                        <div id="tabLogin" class="w-50 tab-active" onclick="switchTab('login')">Iniciar Sesión</div>
-                        <div id="tabRegistro" class="w-50 tab-inactive" onclick="switchTab('registro')">Registrarse</div>
-                    </div>
-
-                    <!-- Contenedor de Alertas -->
-                    <div id="mensajeAlerta" class="alert d-none py-2 px-3 small" role="alert"></div>
-
-                    <!-- Formulario de Iniciar Sesión -->
-                    <form id="formLogin" class="form-section active">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium small mb-1">Correo Electrónico</label>
-                            <input id="loginCorreo" type="email" class="form-control input-yellow p-2" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-medium small mb-1">Contraseña</label>
-                            <input id="loginPassword" type="password" class="form-control input-yellow p-2" required>
-                        </div>
-                        <button id="btnLogin" type="submit" class="btn btn-glass-ios w-100 mb-3">Iniciar Sesión</button>
-                        <!-- type="button" evita que el botón envíe el formulario o recargue la página -->
-                        <button type="button" class="btn btn-outline-glass w-100" onclick="switchTab('registro')">Crear una Cuenta Nueva</button>
-                    </form>
-
-                    <!-- Formulario de Registro -->
-                    <form id="formRegistro" class="form-section">
-                        <div class="mb-3">
-                            <label class="form-label fw-medium small mb-1">Nombre(s)</label>
-                            <input id="regNombres" type="text" class="form-control input-yellow p-2" placeholder="Ana" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-medium small mb-1">Apellidos</label>
-                            <input id="regApellidos" type="text" class="form-control input-yellow p-2" placeholder="Perez Hernandez" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-medium small mb-1">Fecha de nacimiento</label>
-                            <input id="regFechaNac" type="date" class="form-control input-yellow p-2" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-medium small mb-1">Correo Electrónico</label>
-                            <input id="regCorreo" type="email" class="form-control input-yellow p-2" placeholder="ejemplo@correo.com" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label fw-medium small mb-1">Contraseña</label>
-                            <input id="regPassword" type="password" class="form-control input-yellow p-2" placeholder="••••••••••••" required>
-                        </div>
-                        <button id="btnRegistro" type="submit" class="btn btn-glass-ios w-100 mb-3">Crear cuenta</button>
-                        <button type="button" class="btn btn-outline-glass w-100" onclick="switchTab('login')">Volver a Iniciar Sesión</button>
-                    </form>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Se agregó un timestamp al final de los scripts para forzar al navegador a ignorar la caché -->
-    <script src="js/components.js?v=1.1"></script>
-    <script src="js/login.js?v=1.1"></script>
+    <script src="js/components.js?v=5.0"></script>
+    <script src="js/login.js?v=2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
