@@ -8,6 +8,27 @@ function mostrarAlerta(mensaje, esExito) {
     alerta.classList.remove("d-none");
 }
 
+const MAX_BYTES_IMAGEN = 5 * 1024 * 1024; // 5 MB
+const EXT_IMAGEN_PERMITIDAS = /\.(jpe?g|png|webp|gif)$/i;
+const MIME_IMAGEN_PERMITIDOS = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+
+function validarArchivoImagenLocal(archivo) {
+    if (!archivo) return { ok: true };
+
+    if (archivo.size > MAX_BYTES_IMAGEN) {
+        return { ok: false, mensaje: "La imagen supera el tamaño máximo permitido de 5 MB." };
+    }
+
+    const extensionValida = EXT_IMAGEN_PERMITIDAS.test(archivo.name || "");
+    const mimeValido = !archivo.type || MIME_IMAGEN_PERMITIDOS.includes(archivo.type.toLowerCase());
+
+    if (!extensionValida || !mimeValido) {
+        return { ok: false, mensaje: "Archivo no válido. Solo se permiten imágenes JPG, PNG, WEBP o GIF." };
+    }
+
+    return { ok: true };
+}
+
 async function cargarCategoriasSelect() {
     const select = document.getElementById("ndCategoria");
     if (!select) return;
@@ -40,6 +61,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.replace("login.html");
         return;
     }
+
+    // Interceptar archivos inválidos antes de que se dispare la vista previa
+    document.addEventListener("change", (e) => {
+        const inputFotoEl = e.target;
+        if (!inputFotoEl || inputFotoEl.id !== "ndUrlFoto") return;
+
+        const archivo = inputFotoEl.files?.[0];
+        if (!archivo) return;
+
+        const validacion = validarArchivoImagenLocal(archivo);
+        if (!validacion.ok) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            inputFotoEl.value = "";
+
+            const previewBox = document.getElementById("ndPreviewBox");
+            const previewImg = document.getElementById("ndPreviewImg");
+            if (previewBox) previewBox.classList.remove("active");
+            if (previewImg) previewImg.removeAttribute("src");
+
+            mostrarAlerta(validacion.mensaje, false);
+        } else {
+            document.getElementById("alertaDestino")?.classList.add("d-none");
+        }
+    }, true);
 
     // 1. Primero llenamos las categorías para poder seleccionar la actual si estamos editando
     await cargarCategoriasSelect();
@@ -171,23 +217,36 @@ document.getElementById("formNuevoDestino").addEventListener("submit", async (e)
     let guardadoExitoso = false;
 
     try {
-        // PASO 1: SUBIR FOTO SI SE SELECCIONÓ UNA NUEVA
+        // PASO 1: VALIDAR Y SUBIR FOTO SI SE SELECCIONÓ UNA NUEVA
         if (inputArchivo.files.length > 0) {
+            const archivoSeleccionado = inputArchivo.files[0];
+            const validacionLocal = validarArchivoImagenLocal(archivoSeleccionado);
+            if (!validacionLocal.ok) {
+                mostrarAlerta(validacionLocal.mensaje, false);
+                return;
+            }
+
             const formData = new FormData();
-            formData.append("archivo", inputArchivo.files[0]);
+            formData.append("archivo", archivoSeleccionado);
 
             const resUpload = await fetch(`${CONFIG.API_URL_BASE}/Upload/imagen`, {
                 method: "POST",
                 body: formData
             });
 
-            if (!resUpload.ok) throw new Error(`Error al subir imagen (HTTP ${resUpload.status})`);
+            const dataUpload = await resUpload.json().catch(() => null);
 
-            const dataUpload = await resUpload.json();
-            if (dataUpload.isSuccess) {
+            if (resUpload.ok && dataUpload?.isSuccess) {
                 rutaImagenLocal = dataUpload.url;
             } else {
-                mostrarAlerta(dataUpload.respuesta || dataUpload.mensaje || "Error al subir la fotografía.", false);
+                const msgServidor = dataUpload?.respuesta || dataUpload?.mensaje;
+                if (msgServidor) {
+                    mostrarAlerta(msgServidor, false);
+                } else if (resUpload.status === 413) {
+                    mostrarAlerta("La imagen supera el tamaño máximo permitido de 5 MB.", false);
+                } else {
+                    mostrarAlerta(`Archivo no válido o rechazado por el servidor (HTTP ${resUpload.status}).`, false);
+                }
                 return;
             }
         }
